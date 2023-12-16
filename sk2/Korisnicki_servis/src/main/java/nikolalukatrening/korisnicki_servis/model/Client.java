@@ -13,9 +13,9 @@ public class Client {
     @Id // Primary key
     @GeneratedValue(strategy = GenerationType.IDENTITY) // Autoincrement
     private Long id;
-    private Long cardNumber;
-    private Long reservedTraining;
-    private Boolean accepted;
+    private Integer cardNumber;
+    private Integer reservedTraining;
+    private Boolean isActivated;
 
     @Embedded
     private User user;
