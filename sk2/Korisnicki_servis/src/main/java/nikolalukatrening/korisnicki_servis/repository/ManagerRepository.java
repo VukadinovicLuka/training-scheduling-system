@@ -1,4 +1,9 @@
 package nikolalukatrening.korisnicki_servis.repository;
 
-public interface ManagerRepository {
+import nikolalukatrening.korisnicki_servis.model.Manager;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface ManagerRepository extends JpaRepository<Manager,Long> {
 }
