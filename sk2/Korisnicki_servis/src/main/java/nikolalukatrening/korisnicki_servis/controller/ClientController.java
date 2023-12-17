@@ -23,7 +23,7 @@ public class ClientController {
         this.clientService = clientService;
     }
 
-    // klijenti imaju zasebne rute za registraciju
+
     @PostMapping("/register")
     public ResponseEntity<ClientDto> registerClient(@RequestBody @Valid ClientCreateDto clientCreateDto) {
         // Logika za slanje zahteva ka notifikacionom servisu preko message brokera
