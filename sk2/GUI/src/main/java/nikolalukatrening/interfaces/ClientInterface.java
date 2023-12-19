@@ -41,10 +41,10 @@ public class ClientInterface extends JFrame {
         cardPanel.add(rateCoachOrGymView, "rate");
 
         // Dodajte dugmiće u toolbar
-        addButtonToToolbar("Zakazivanje treninga", "schedule", "D:\\\\LukaFakultet\\\\Komponente\\\\sk2-teamNikolaLuka\\\\sk2\\\\GUI\\\\src\\\\main\\\\resources\\\\schedule.png");
-        addButtonToToolbar("Pregled i izmena ličnih podataka", "profile", "D:\\\\LukaFakultet\\\\Komponente\\\\sk2-teamNikolaLuka\\\\sk2\\\\GUI\\\\src\\\\main\\\\resources\\\\izmena.jpeg");
-        addButtonToToolbar("Prijavljivanje na grupne treninge", "group", "D:\\\\LukaFakultet\\\\Komponente\\\\sk2-teamNikolaLuka\\\\sk2\\\\GUI\\\\src\\\\main\\\\resources\\\\grupa.jpg");
-        addButtonToToolbar("Ocena trenera ili teretane", "rate", "D:\\\\LukaFakultet\\\\Komponente\\\\sk2-teamNikolaLuka\\\\sk2\\\\GUI\\\\src\\\\main\\\\resources\\\\ocena.png");
+//        addButtonToToolbar("Zakazivanje treninga", "schedule", "D:\\\\LukaFakultet\\\\Komponente\\\\sk2-teamNikolaLuka\\\\sk2\\\\GUI\\\\src\\\\main\\\\resources\\\\schedule.png");
+//        addButtonToToolbar("Pregled i izmena ličnih podataka", "profile", "D:\\\\LukaFakultet\\\\Komponente\\\\sk2-teamNikolaLuka\\\\sk2\\\\GUI\\\\src\\\\main\\\\resources\\\\izmena.jpeg");
+//        addButtonToToolbar("Prijavljivanje na grupne treninge", "group", "D:\\\\LukaFakultet\\\\Komponente\\\\sk2-teamNikolaLuka\\\\sk2\\\\GUI\\\\src\\\\main\\\\resources\\\\grupa.jpg");
+//        addButtonToToolbar("Ocena trenera ili teretane", "rate", "D:\\\\LukaFakultet\\\\Komponente\\\\sk2-teamNikolaLuka\\\\sk2\\\\GUI\\\\src\\\\main\\\\resources\\\\ocena.png");
 
         // Dodajte toolBar i cardPanel u frame
         add(toolBar, BorderLayout.NORTH);
