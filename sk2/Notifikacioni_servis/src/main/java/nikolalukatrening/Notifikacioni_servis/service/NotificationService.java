@@ -1,4 +1,4 @@
 package nikolalukatrening.Notifikacioni_servis.service;
 
-public interface EmailService {
+public interface NotificationService {
 }

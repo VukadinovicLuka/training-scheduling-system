@@ -1,20 +1,34 @@
 package nikolalukatrening.Notifikacioni_servis.listener;
 
 
+import jakarta.jms.JMSException;
+import jakarta.jms.Message;
 import nikolalukatrening.Notifikacioni_servis.model.EmailMessage;
-import nikolalukatrening.Notifikacioni_servis.service.EmailService;
-import org.springframework.beans.factory.annotation.Autowired;
+import nikolalukatrening.Notifikacioni_servis.service.impl.EmailServiceImpl;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
 
 @Component
 public class NotificationListener {
 
-    @Autowired
-    private EmailService emailService;
+    private EmailServiceImpl emailServiceImpl;
+    private MessageHelper messageHelper;
 
-    @JmsListener(destination = "activationQueue")
-    public void receiveMessage(EmailMessage emailMessage) {
-        emailService.sendEmail(emailMessage);
+    public NotificationListener(EmailServiceImpl emailServiceImpl, MessageHelper messageHelper) {
+        this.emailServiceImpl = emailServiceImpl;
+        this.messageHelper = messageHelper;
+    }
+
+    @JmsListener(destination = "${destination.createActivation}", concurrency = "5-10")
+    public void onActivationMessage(Message message) throws JMSException {
+        EmailMessage emailMessage = messageHelper.getMessage(message, EmailMessage.class);
+        System.out.println("Activation message received");
+        System.out.println("Email message: " + emailMessage);
+
+        // treba emailMessage dodati u h2 bazu za notifikacije
+
+
+//        emailService.sendEmail(emailMessage);
+
     }
 }
