@@ -59,7 +59,6 @@ public class ClientServiceImpl implements ClientService {
         return clientMapper.clientToClientDto(client);
     }
 
-
     private void createEmailMessageDto(ClientDto clientDto) {
         Map<String, String> params = new HashMap<>();
         params.put("ime", clientDto.getFirstName());
@@ -68,7 +67,8 @@ public class ClientServiceImpl implements ClientService {
         EmailMessageDto emailMessage = new EmailMessageDto(
                 clientDto.getEmail(),
                 "Activation Email",
-                "Pozdrav %ime% %prezime%, da bi ste se verifikovali idite na sledeci %link%",
+                "Pozdrav," + params.get("ime") + " " + params.get("prezime") + ",da biste nastavili verifikaciju idite na link:"
+                 + params.get("link"),
                 "ACTIVATION",
                 params
         );

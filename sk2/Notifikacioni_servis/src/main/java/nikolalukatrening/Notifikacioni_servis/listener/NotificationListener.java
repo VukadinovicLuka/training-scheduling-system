@@ -4,6 +4,9 @@ package nikolalukatrening.Notifikacioni_servis.listener;
 import jakarta.jms.JMSException;
 import jakarta.jms.Message;
 import nikolalukatrening.Notifikacioni_servis.model.EmailMessage;
+import nikolalukatrening.Notifikacioni_servis.model.NotificationType;
+import nikolalukatrening.Notifikacioni_servis.repository.EmailMessageRepository;
+import nikolalukatrening.Notifikacioni_servis.service.EmailService;
 import nikolalukatrening.Notifikacioni_servis.service.impl.EmailServiceImpl;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
@@ -11,12 +14,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class NotificationListener {
 
-    private EmailServiceImpl emailServiceImpl;
+    private EmailService emailService;
     private MessageHelper messageHelper;
+    private EmailMessageRepository emailMessageRepository;
 
-    public NotificationListener(EmailServiceImpl emailServiceImpl, MessageHelper messageHelper) {
-        this.emailServiceImpl = emailServiceImpl;
+    public NotificationListener(EmailService emailService, MessageHelper messageHelper,EmailMessageRepository emailMessageRepository) {
+        this.emailService = emailService;
         this.messageHelper = messageHelper;
+        this.emailMessageRepository = emailMessageRepository;
     }
 
     @JmsListener(destination = "${destination.createActivation}", concurrency = "5-10")
@@ -25,10 +30,16 @@ public class NotificationListener {
         System.out.println("Activation message received");
         System.out.println("Email message: " + emailMessage);
 
+        NotificationType notificationType = new NotificationType();
+        notificationType.setType(emailMessage.getType());
+        notificationType.setReceiver(emailMessage.getTo());
+        notificationType.setLink(emailMessage.getParams().get("link"));
+        notificationType.setFirstName(emailMessage.getParams().get("ime"));
+        notificationType.setLastName(emailMessage.getParams().get("prezime"));
+        emailMessageRepository.save(notificationType);
+
         // treba emailMessage dodati u h2 bazu za notifikacije
 
-
-//        emailService.sendEmail(emailMessage);
-
+        emailService.sendEmail(emailMessage);
     }
 }

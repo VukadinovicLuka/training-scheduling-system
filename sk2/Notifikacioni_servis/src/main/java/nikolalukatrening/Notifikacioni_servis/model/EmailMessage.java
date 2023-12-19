@@ -11,6 +11,7 @@ import java.util.Map;
 @Getter
 @Setter
 public class EmailMessage implements Serializable { // klasa koja služi za transfer podataka preko JMS.
+
       private String to;
       private String subject;
       private String body;
