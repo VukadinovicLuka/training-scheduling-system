@@ -3,6 +3,7 @@ package nikolalukatrening.korisnicki_servis.service.impl;
 import nikolalukatrening.Notifikacioni_servis.model.EmailMessage;
 import nikolalukatrening.korisnicki_servis.dto.ClientCreateDto;
 import nikolalukatrening.korisnicki_servis.dto.ClientDto;
+import nikolalukatrening.korisnicki_servis.dto.ClientUpdateDto;
 import nikolalukatrening.korisnicki_servis.mapper.ClientMapper;
 import nikolalukatrening.korisnicki_servis.model.Client;
 import nikolalukatrening.korisnicki_servis.repository.ClientRepository;
@@ -36,12 +37,20 @@ public class ClientServiceImpl implements ClientService {
         ClientDto clientDto = clientMapper.clientToClientDto(client);
 
         // Kreirajte poruku koja će biti poslata
-        EmailMessage emailMessage = createEmailMessage(clientDto);
+        //EmailMessage emailMessage = createEmailMessage(clientDto);
 
         // Pošaljite poruku u queue
-        jmsTemplate.convertAndSend("activationQueue", emailMessage); //
+        //jmsTemplate.convertAndSend("activationQueue", emailMessage); //
 
         return clientDto;
+    }
+
+    @Override
+    public ClientDto update(ClientUpdateDto clientUpdateDto) {
+        Client client = clientRepository.findByUserUsername(clientUpdateDto.getOldUsername()).orElseThrow(()->new RuntimeException());
+        client = clientMapper.clientUpdateToClient(client,clientUpdateDto);
+        client = clientRepository.save(client);
+        return clientMapper.clientToClientDto(client);
     }
 
     private EmailMessage createEmailMessage(ClientDto clientDto) {
