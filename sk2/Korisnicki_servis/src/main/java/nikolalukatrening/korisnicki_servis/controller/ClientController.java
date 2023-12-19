@@ -3,6 +3,7 @@ package nikolalukatrening.korisnicki_servis.controller;
 import jakarta.validation.Valid;
 import nikolalukatrening.korisnicki_servis.dto.ClientCreateDto;
 import nikolalukatrening.korisnicki_servis.dto.ClientDto;
+import nikolalukatrening.korisnicki_servis.dto.ClientUpdateDto;
 import nikolalukatrening.korisnicki_servis.service.ClientService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,5 +37,10 @@ public class ClientController {
                 .map(clientCreateDto -> clientService.add(clientCreateDto))
                 .collect(Collectors.toList());
         return new ResponseEntity<>(savedClients, HttpStatus.CREATED);
+    }
+
+    @PutMapping
+    public ResponseEntity<ClientDto> updateClient(@RequestBody @Valid ClientUpdateDto clientUpdateDto){
+        return new ResponseEntity<>(clientService.update(clientUpdateDto), HttpStatus.OK);
     }
 }
