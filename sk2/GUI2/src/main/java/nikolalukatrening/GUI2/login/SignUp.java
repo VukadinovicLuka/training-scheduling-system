@@ -150,16 +150,13 @@ public class SignUp extends JFrame {
 
         // Kreirajte DTO objekat
         ClientCreateDto clientCreateDto = new ClientCreateDto(username, password, email, dateOfBirth, name, lastname, 1,1);
-        ObjectMapper objectMapper = new ObjectMapper();
-        String jsonPayload = objectMapper.writeValueAsString(clientCreateDto);
-        System.out.println("JSON Payload: " + jsonPayload);
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        String jsonPayload = objectMapper.writeValueAsString(clientCreateDto);
+//        System.out.println("JSON Payload: " + jsonPayload);
 
         // Kreirajte header-e za zahtev
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-
-        // Kreirajte RequestEntity koristeći ClientCreateDto i header-e
-//        RequestEntity<ClientCreateDto> requestEntity = new RequestEntity<>(clientCreateDto, headers, HttpMethod.POST, URI.create("http://localhost:8080/api/client/register"));
         RequestEntity<ClientCreateDto> requestEntity = RequestEntity.post(URI.create("http://localhost:8080/api/client/register")).headers(headers).body(clientCreateDto);
 
         return requestEntity;
@@ -169,13 +166,6 @@ public class SignUp extends JFrame {
         RequestEntity<ClientCreateDto> requestEntity = clientCreateDtoRequestEntity();
         System.out.println("request Entity: " + requestEntity);
         try {
-//            // Pošaljite zahtev koristeći RestTemplate
-//            ResponseEntity<ClientCreateDto> response = SignUpServiceRestTemplate.exchange(
-//                    "http://localhost:8080/api/client/register/",
-//                    HttpMethod.POST,
-//                    requestEntity,
-//                    ClientCreateDto.class
-//            );
             // Pošaljite zahtev koristeći RestTemplate
             ResponseEntity<ClientDto> response = SignUpServiceRestTemplate.exchange(
                     requestEntity,
@@ -189,7 +179,6 @@ public class SignUp extends JFrame {
                 Login loginFrame = new Login();
                 loginFrame.setVisible(true);
                 this.dispose();
-                // zatvori template
             } else {
                 JOptionPane.showMessageDialog(this, "Registracija nije uspešna.", "Greška", JOptionPane.ERROR_MESSAGE);
             }

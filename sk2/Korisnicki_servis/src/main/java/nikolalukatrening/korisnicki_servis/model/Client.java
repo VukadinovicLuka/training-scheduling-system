@@ -19,4 +19,5 @@ public class Client {
 
     @Embedded
     private User user;
+
 }

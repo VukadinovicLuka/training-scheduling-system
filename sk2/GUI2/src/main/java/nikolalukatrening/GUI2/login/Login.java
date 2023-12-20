@@ -34,7 +34,6 @@ public class Login extends JFrame {
 
     private void initComponents() {
         SignUpServiceRestTemplate = new RestTemplate();
-//        SignUpServiceRestTemplate.setUriTemplateHandler(new DefaultUriBuilderFactory("http://localhost:8080/api"));
         List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
         MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
         converter.setSupportedMediaTypes(Collections.singletonList(MediaType.APPLICATION_JSON));

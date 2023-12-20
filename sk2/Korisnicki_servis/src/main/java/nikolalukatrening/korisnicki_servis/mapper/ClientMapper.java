@@ -31,6 +31,7 @@ public class ClientMapper {
         user.setLastName(clientCreateDto.getLastName());
         user.setPassword(clientCreateDto.getPassword());
         user.setDateOfBirth(clientCreateDto.getDateOfBirth());
+        user.setRole("ROLE_CLIENT");
 
         Client client = new Client();
         client.setUser(user);

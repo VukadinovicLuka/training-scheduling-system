@@ -1,9 +1,7 @@
 package nikolalukatrening.korisnicki_servis.controller;
 
 import jakarta.validation.Valid;
-import nikolalukatrening.korisnicki_servis.dto.ClientCreateDto;
-import nikolalukatrening.korisnicki_servis.dto.ClientDto;
-import nikolalukatrening.korisnicki_servis.dto.ClientUpdateDto;
+import nikolalukatrening.korisnicki_servis.dto.*;
 import nikolalukatrening.korisnicki_servis.service.ClientService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +25,6 @@ public class ClientController {
 
     @PostMapping("/register")
     public ResponseEntity<ClientDto> registerClient(@RequestBody @Valid ClientCreateDto clientCreateDto) {
-        System.out.println("ClientController.registerClient" + clientCreateDto);
         // Logika za slanje zahteva ka notifikacionom servisu preko message brokera
         return new ResponseEntity<>(clientService.add(clientCreateDto), HttpStatus.CREATED);
     }
@@ -43,5 +40,10 @@ public class ClientController {
     @PutMapping
     public ResponseEntity<ClientDto> updateClient(@RequestBody @Valid ClientUpdateDto clientUpdateDto){
         return new ResponseEntity<>(clientService.update(clientUpdateDto), HttpStatus.OK);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<TokenResponseDto> loginUser(@RequestBody @Valid TokenRequestDto tokenRequestDto) {
+        return new ResponseEntity<>(clientService.login(tokenRequestDto), HttpStatus.OK);
     }
 }
