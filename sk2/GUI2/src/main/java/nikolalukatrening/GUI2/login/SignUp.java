@@ -1,8 +1,11 @@
 package nikolalukatrening.GUI2.login;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import lombok.Setter;
 import nikolalukatrening.GUI2.client.ClientCreateDto;
+import nikolalukatrening.GUI2.client.ClientDto;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
@@ -14,7 +17,7 @@ import java.net.URI;
 
 @Getter
 @Setter
-@Service
+
 public class SignUp extends JFrame {
 
     private JPanel jPanel1;
@@ -26,6 +29,7 @@ public class SignUp extends JFrame {
     public SignUp(RestTemplate SignUpServiceRestTemplate) {
         this.SignUpServiceRestTemplate = SignUpServiceRestTemplate;
         initComponents();
+
     }
 
     private void initComponents() {
@@ -81,7 +85,13 @@ public class SignUp extends JFrame {
         jButton1.setBackground(new Color(0, 102, 102));
         jButton1.setForeground(Color.WHITE);
         jButton1.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        jButton1.addActionListener(evt -> jButton1ActionPerformed());
+        jButton1.addActionListener(evt -> {
+            try {
+                jButton1ActionPerformed();
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+        });
 
         jLabel8 = new JLabel("I've an account");
         jLabel8.setFont(new Font("Segoe UI", Font.PLAIN, 14));
@@ -129,20 +139,7 @@ public class SignUp extends JFrame {
         this.dispose();
     }
 
-//    private RequestEntity<ClientCreateDto> clientCreateDto(){
-//        String name = jTextField1.getText();
-//        String lastname = jTextField2.getText();
-//        String dateOfBirth = jTextField3.getText();
-//        String email = jTextField4.getText();
-//        String username = jTextField5.getText();
-//        String password = new String(jPasswordField1.getPassword());
-//        ClientCreateDto clientCreateDto = new ClientCreateDto(username,password,email,dateOfBirth,name,lastname);
-//        RequestEntity<ClientCreateDto> clientCreateDtoRequestEntity;
-//        clientCreateDtoRequestEntity = new RequestEntity<ClientCreateDto>();
-//        return clientCreateDtoRequestEntity;
-//    }
-
-    private RequestEntity<ClientCreateDto> clientCreateDtoRequestEntity() {
+    private RequestEntity<ClientCreateDto> clientCreateDtoRequestEntity() throws JsonProcessingException {
         // Preuzmite podatke iz tekstualnih polja
         String username = jTextField5.getText();
         String password = new String(jPasswordField1.getPassword());
@@ -152,47 +149,47 @@ public class SignUp extends JFrame {
         String lastname = jTextField2.getText();
 
         // Kreirajte DTO objekat
-        ClientCreateDto clientCreateDto = new ClientCreateDto(username, password, email, dateOfBirth, name, lastname);
+        ClientCreateDto clientCreateDto = new ClientCreateDto(username, password, email, dateOfBirth, name, lastname, 1,1);
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonPayload = objectMapper.writeValueAsString(clientCreateDto);
+        System.out.println("JSON Payload: " + jsonPayload);
 
         // Kreirajte header-e za zahtev
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         // Kreirajte RequestEntity koristeći ClientCreateDto i header-e
-        RequestEntity<ClientCreateDto> requestEntity = new RequestEntity<>(clientCreateDto, headers, HttpMethod.POST, URI.create("/client/register"));
+//        RequestEntity<ClientCreateDto> requestEntity = new RequestEntity<>(clientCreateDto, headers, HttpMethod.POST, URI.create("http://localhost:8080/api/client/register"));
+        RequestEntity<ClientCreateDto> requestEntity = RequestEntity.post(URI.create("http://localhost:8080/api/client/register")).headers(headers).body(clientCreateDto);
 
         return requestEntity;
     }
-
-//    private void jButton1ActionPerformed() {
-//        ResponseEntity<ClientCreateDto> clientDtoResponseEntity = null;
-//        try {
-//            clientDtoResponseEntity = SignUpServiceRestTemplate.exchange("/client/register/"
-//                    , HttpMethod.POST, clientCreateDto(), ClientCreateDto.class);
-//        } catch (HttpClientErrorException e) {
-//            if (e.getStatusCode().equals(HttpStatus.NOT_FOUND))
-//                throw new NotFoundException(String.format("Projection with id: %d not found.", reservationCreateDto.getProjectionId()));
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//    }
-
-    private void jButton1ActionPerformed() {
+    private void jButton1ActionPerformed() throws JsonProcessingException {
         // Kreirajte RequestEntity
         RequestEntity<ClientCreateDto> requestEntity = clientCreateDtoRequestEntity();
-
+        System.out.println("request Entity: " + requestEntity);
         try {
+//            // Pošaljite zahtev koristeći RestTemplate
+//            ResponseEntity<ClientCreateDto> response = SignUpServiceRestTemplate.exchange(
+//                    "http://localhost:8080/api/client/register/",
+//                    HttpMethod.POST,
+//                    requestEntity,
+//                    ClientCreateDto.class
+//            );
             // Pošaljite zahtev koristeći RestTemplate
-            ResponseEntity<ClientCreateDto> response = SignUpServiceRestTemplate.exchange(
-                    "http://localhost:8080/client/register",
-                    HttpMethod.POST,
+            ResponseEntity<ClientDto> response = SignUpServiceRestTemplate.exchange(
                     requestEntity,
-                    ClientCreateDto.class
+                    ClientDto.class
             );
 
             // Obrada odgovora
             if (response.getStatusCode() == HttpStatus.CREATED) {
                 JOptionPane.showMessageDialog(this, "Uspešna registracija!", "Status", JOptionPane.INFORMATION_MESSAGE);
+                // vrati me nazad na login
+                Login loginFrame = new Login();
+                loginFrame.setVisible(true);
+                this.dispose();
+                // zatvori template
             } else {
                 JOptionPane.showMessageDialog(this, "Registracija nije uspešna.", "Greška", JOptionPane.ERROR_MESSAGE);
             }

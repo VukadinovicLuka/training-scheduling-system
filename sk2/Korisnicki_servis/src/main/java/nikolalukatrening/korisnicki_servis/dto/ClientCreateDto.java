@@ -37,4 +37,17 @@ public class ClientCreateDto {
         private Integer reservedTraining;
 
 
+        @Override
+        public String toString() {
+                return "ClientCreateDto{" +
+                        "username='" + username + '\'' +
+                        ", password='" + password + '\'' +
+                        ", email='" + email + '\'' +
+                        ", dateOfBirth='" + dateOfBirth + '\'' +
+                        ", firstName='" + firstName + '\'' +
+                        ", lastName='" + lastName + '\'' +
+                        ", cardNumber=" + cardNumber +
+                        ", reservedTraining=" + reservedTraining +
+                        '}';
+        }
 }

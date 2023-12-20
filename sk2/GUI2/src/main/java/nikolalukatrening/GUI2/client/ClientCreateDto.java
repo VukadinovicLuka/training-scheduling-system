@@ -1,5 +1,5 @@
 package nikolalukatrening.GUI2.client;
-//import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -8,29 +8,33 @@ import lombok.Setter;
 @Setter
 public class ClientCreateDto {
 
-    //@JsonProperty("username")
+    @JsonProperty("username")
     private String username;
-    //@JsonProperty("password")
+    @JsonProperty("password")
     private String password;
-    //@JsonProperty("email")
+    @JsonProperty("email")
     private String email;
-    //@JsonProperty("dateOfBirth")
+    @JsonProperty("dateOfBirth")
     private String dateOfBirth;
-    //@JsonProperty("firstName")
+    @JsonProperty("firstName")
     private String firstName;
-    //@JsonProperty("lastName")
+    @JsonProperty("lastName")
     private String lastName;
 
+    @JsonProperty("cardNumber")
     private Integer cardNumber;
 
+    @JsonProperty("reservedTraining")
     private Integer reservedTraining;
 
-    public ClientCreateDto(String username, String password, String email, String dateOfBirth, String firstName, String lastName) {
+    public ClientCreateDto(String username, String password, String email, String dateOfBirth, String firstName, String lastName, Integer cardNumber, Integer reservedTraining) {
         this.username = username;
         this.password = password;
         this.email = email;
         this.dateOfBirth = dateOfBirth;
         this.firstName = firstName;
         this.lastName = lastName;
+        this.cardNumber = cardNumber;
+        this.reservedTraining = reservedTraining;
     }
 }

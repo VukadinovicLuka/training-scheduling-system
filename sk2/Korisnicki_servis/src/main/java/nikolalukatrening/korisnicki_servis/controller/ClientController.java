@@ -27,6 +27,7 @@ public class ClientController {
 
     @PostMapping("/register")
     public ResponseEntity<ClientDto> registerClient(@RequestBody @Valid ClientCreateDto clientCreateDto) {
+        System.out.println("ClientController.registerClient" + clientCreateDto);
         // Logika za slanje zahteva ka notifikacionom servisu preko message brokera
         return new ResponseEntity<>(clientService.add(clientCreateDto), HttpStatus.CREATED);
     }
