@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import nikolalukatrening.GUI2.interfaces.AdminInterface;
 import nikolalukatrening.GUI2.interfaces.ClientInterface;
+import org.springframework.web.client.RestTemplate;
 
 
 import javax.swing.*;
@@ -19,7 +20,7 @@ public class Login extends JFrame {
     private JLabel jLabel1, jLabel2, jLabel3, jLabel4;
     private JPasswordField jPasswordField1;
     private JTextField jTextField1;
-
+    private RestTemplate SignUpServiceRestTemplate;
     public Login() {
         initComponents();
     }
@@ -86,7 +87,7 @@ public class Login extends JFrame {
 
     private void jButton2ActionPerformed() {
         // Kreiranje instance SignUp prozora
-        SignUp signUpFrame = new SignUp();
+        SignUp signUpFrame = new SignUp(getSignUpServiceRestTemplate());
         // Postavljanje SignUp prozora da bude vidljiv
         signUpFrame.setVisible(true);
         // Zatvaranje trenutnog (Login) prozora
