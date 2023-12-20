@@ -1,4 +1,4 @@
-package nikolalukatrening.login;
+package nikolalukatrening.GUI2.login;
 
 import lombok.Getter;
 import lombok.Setter;

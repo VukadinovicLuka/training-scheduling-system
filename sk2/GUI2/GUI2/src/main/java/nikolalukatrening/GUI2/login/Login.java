@@ -1,9 +1,10 @@
-package nikolalukatrening.login;
+package nikolalukatrening.GUI2.login;
 
 import lombok.Getter;
 import lombok.Setter;
-import nikolalukatrening.interfaces.AdminInterface;
-import nikolalukatrening.interfaces.ClientInterface;
+import nikolalukatrening.GUI2.interfaces.AdminInterface;
+import nikolalukatrening.GUI2.interfaces.ClientInterface;
+
 
 import javax.swing.*;
 import java.awt.*;

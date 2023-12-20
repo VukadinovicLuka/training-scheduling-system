@@ -1,10 +1,9 @@
-package nikolalukatrening.interfaces;
+package nikolalukatrening.GUI2.interfaces;
 
-import nikolalukatrening.clientViews.GroupTraining;
-import nikolalukatrening.clientViews.ProfileEditor;
-import nikolalukatrening.clientViews.RateCoachOrGym;
-import nikolalukatrening.clientViews.ScheduleTraining;
-
+import nikolalukatrening.GUI2.clientViews.GroupTraining;
+import nikolalukatrening.GUI2.clientViews.ProfileEditor;
+import nikolalukatrening.GUI2.clientViews.RateCoachOrGym;
+import nikolalukatrening.GUI2.clientViews.ScheduleTraining;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;

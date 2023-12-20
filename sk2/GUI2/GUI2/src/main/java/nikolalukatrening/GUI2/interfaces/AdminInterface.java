@@ -1,4 +1,4 @@
-package nikolalukatrening.interfaces;
+package nikolalukatrening.GUI2.interfaces;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;

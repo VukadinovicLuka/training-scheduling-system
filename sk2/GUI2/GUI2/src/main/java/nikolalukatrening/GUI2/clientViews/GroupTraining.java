@@ -1,7 +1,4 @@
-package nikolalukatrening.clientViews;
-
-import javax.swing.*;
-
+package nikolalukatrening.GUI2.clientViews;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;

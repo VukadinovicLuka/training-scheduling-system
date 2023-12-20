@@ -15,4 +15,6 @@ public class User {
     private String firstName;
     private String lastName;
     private String dateOfBirth;
+
+    private String role;
 }

@@ -1,4 +1,4 @@
-package nikolalukatrening.clientViews;
+package nikolalukatrening.GUI2.clientViews;
 
 import javax.swing.*;
 import java.awt.*;
