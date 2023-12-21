@@ -3,10 +3,7 @@ package nikolalukatrening.GUI2.login;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.Getter;
 import lombok.Setter;
-import nikolalukatrening.GUI2.client.ClientCreateDto;
-import nikolalukatrening.GUI2.client.ClientDto;
-import nikolalukatrening.GUI2.client.TokenRequestDto;
-import nikolalukatrening.GUI2.client.TokenResponseDto;
+import nikolalukatrening.GUI2.client.*;
 import nikolalukatrening.GUI2.interfaces.AdminInterface;
 import nikolalukatrening.GUI2.interfaces.ClientInterface;
 import org.springframework.http.*;
@@ -137,43 +134,72 @@ public class Login extends JFrame {
         return requestEntity;
     }
 
+    private RequestEntity<TokenResponseDto> GetClaimsFromTokenRequestEntity(String token) throws JsonProcessingException {
+
+        TokenResponseDto tokenResponseDto = new TokenResponseDto(token);
+
+        // Kreirajte header-e za zahtev
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        RequestEntity<TokenResponseDto> requestEntity = RequestEntity.post(URI.create("http://localhost:8080/api/client/login/token")).headers(headers).body(tokenResponseDto);
+
+        return requestEntity;
+    }
+
     private void jButton1ActionPerformed() throws JsonProcessingException {
-//        if(jTextField1.getText().equals("admin")){
-//            AdminInterface adminFrame = new AdminInterface();
-//            adminFrame.setVisible(true);
-//            this.dispose();
-//        } else if(jTextField1.getText().equals("client")){
-//            ClientInterface clientInterface = new ClientInterface();
-//            clientInterface.setVisible(true);
-//            this.dispose();
-//        } else if(jTextField1.getText().equals("manager")){
-//            //ManagerInterface managerFrame = new ManagerInterface();
-//            //managerFrame.setVisible(true);
-//            this.dispose();
-//        } else {
-//            this.dispose();
-//        }
 
-        RequestEntity<TokenRequestDto> requestEntity = TokenRequestDtoRequestEntity();
-
+        RequestEntity<TokenRequestDto> requestTokenEntity = TokenRequestDtoRequestEntity();
 
         try {
             // Pošaljite zahtev koristeći RestTemplate
-            ResponseEntity<TokenResponseDto> response = LogInServiceRestTemplate.exchange(
-                    requestEntity,
+            ResponseEntity<TokenResponseDto> responseForToken = LogInServiceRestTemplate.exchange(
+                    requestTokenEntity,
                     TokenResponseDto.class
             );
 
             // Obrada odgovora
-            String token = response.getBody().getToken();
-            if (response.getStatusCode() == HttpStatus.OK) {
-                JOptionPane.showMessageDialog(this, "Uspešna prijava!", "Status", JOptionPane.INFORMATION_MESSAGE);
-                ClientInterface clientInterface = new ClientInterface();
-                clientInterface.setVisible(true);
-                this.dispose();
+            String token = responseForToken.getBody().getToken();
+            System.out.println("Token:" + token);
+            RequestEntity<TokenResponseDto> requestClaimsEntity = GetClaimsFromTokenRequestEntity(token);
+            ResponseEntity<ClaimsResponseDto> responseForClaims = LogInServiceRestTemplate.exchange(
+                    requestClaimsEntity,
+                    ClaimsResponseDto.class
+            );
+
+            if (responseForClaims.getStatusCode() == HttpStatus.OK) {
+//                JOptionPane.showMessageDialog(this, "Uspešna prijava!", "Status", JOptionPane.INFORMATION_MESSAGE);
+                ClaimsResponseDto claims = responseForClaims.getBody();
+
+                if(claims.getRole().equals("ROLE_ADMIN")){
+                    AdminInterface adminFrame = new AdminInterface();
+                    adminFrame.setVisible(true);
+                    this.dispose();
+                } else if(claims.getRole().equals("ROLE_CLIENT")){
+                    ClientInterface clientInterface = new ClientInterface();
+                    clientInterface.setVisible(true);
+                    this.dispose();
+                } else if(claims.getRole().equals("ROLE_MANAGER")){
+//                    ManagerInterface managerFrame = new ManagerInterface();
+//                    managerFrame.setVisible(true);
+//                    this.dispose();
+                } else {
+                    JOptionPane.showMessageDialog(this, "GRESKA KOD ROLE", "Greška", JOptionPane.ERROR_MESSAGE);
+                }
             } else {
-                JOptionPane.showMessageDialog(this, "Prijava nije uspešna.", "Greška", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "GRESKA KOD PARSOVANJA TOKENA U CLAIMOVE", "Greška", JOptionPane.ERROR_MESSAGE);
             }
+
+
+
+
+//            if (responseForToken.getStatusCode() == HttpStatus.OK) {
+//                JOptionPane.showMessageDialog(this, "Uspešna prijava!", "Status", JOptionPane.INFORMATION_MESSAGE);
+////                ClientInterface clientInterface = new ClientInterface();
+////                clientInterface.setVisible(true);
+////                this.dispose();
+//            } else {
+//                JOptionPane.showMessageDialog(this, "Prijava nije uspešna.", "Greška", JOptionPane.ERROR_MESSAGE);
+//            }
         } catch (HttpClientErrorException e) {
             JOptionPane.showMessageDialog(this, "Greška: " + e.getMessage(), "Greška", JOptionPane.ERROR_MESSAGE);
         }

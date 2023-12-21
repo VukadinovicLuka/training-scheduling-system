@@ -45,6 +45,8 @@ public class TokenServiceImpl implements TokenService {
                     .parseClaimsJws(jwt)
                     .getBody();
 
+
+
             return claims;
         } catch (Exception e) {
             // Logujte ili obradite izuzetak kako smatrate da je potrebno

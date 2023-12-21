@@ -6,9 +6,13 @@ import nikolalukatrening.korisnicki_servis.dto.*;
 import nikolalukatrening.korisnicki_servis.exception.NotFoundException;
 import nikolalukatrening.korisnicki_servis.helper.MessageHelper;
 import nikolalukatrening.korisnicki_servis.mapper.ClientMapper;
+import nikolalukatrening.korisnicki_servis.model.Admin;
 import nikolalukatrening.korisnicki_servis.model.Client;
+import nikolalukatrening.korisnicki_servis.model.Manager;
 import nikolalukatrening.korisnicki_servis.model.User;
+import nikolalukatrening.korisnicki_servis.repository.AdminRepository;
 import nikolalukatrening.korisnicki_servis.repository.ClientRepository;
+import nikolalukatrening.korisnicki_servis.repository.ManagerRepository;
 import nikolalukatrening.korisnicki_servis.security.service.TokenService;
 import nikolalukatrening.korisnicki_servis.service.ClientService;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,6 +28,8 @@ import java.util.Map;
 public class ClientServiceImpl implements ClientService {
 
     private ClientRepository clientRepository;
+    private AdminRepository adminRepository;
+    private ManagerRepository managerRepository;
     private ClientMapper clientMapper;
 
     private JmsTemplate jmsTemplate;
@@ -33,13 +39,16 @@ public class ClientServiceImpl implements ClientService {
 
 
     public ClientServiceImpl(ClientRepository clientRepository, ClientMapper clientMapper,
-                             JmsTemplate jmsTemplate, MessageHelper messageHelper, @Value("${destination.createActivation}") String activationDestination, TokenService tokenService) {
+                             JmsTemplate jmsTemplate, MessageHelper messageHelper, @Value("${destination.createActivation}") String activationDestination,
+                             TokenService tokenService, AdminRepository adminRepository, ManagerRepository managerRepository) {
         this.clientRepository = clientRepository;
         this.clientMapper = clientMapper;
         this.jmsTemplate = jmsTemplate;
         this.messageHelper = messageHelper;
         this.activationDestination = activationDestination;
         this.tokenService = tokenService;
+        this.adminRepository = adminRepository;
+        this.managerRepository = managerRepository;
     }
 
     @Override
@@ -66,16 +75,42 @@ public class ClientServiceImpl implements ClientService {
     @Override
     public TokenResponseDto login(TokenRequestDto tokenRequestDto) {
         //Try to find active user for specified credentials
-        Client client = clientRepository
-                .findByUser_UsernameAndUser_Password(tokenRequestDto.getUsername(), tokenRequestDto.getPassword())
-                .orElseThrow(() -> new NotFoundException(String.format("User with username: %s and password: %s not found.", tokenRequestDto.getUsername(),
-                                tokenRequestDto.getPassword())));
-        //Create token payload
+//        Client client = clientRepository
+//                .findByUser_UsernameAndUser_Password(tokenRequestDto.getUsername(), tokenRequestDto.getPassword())
+//                .orElseThrow(() -> new NotFoundException(String.format("User with username: %s and password: %s not found.", tokenRequestDto.getUsername(),
+//                                tokenRequestDto.getPassword())));
         Claims claims = Jwts.claims();
-        claims.put("id", client.getId());
-        claims.put("role", client.getUser().getRole());
+        if (clientRepository.findByUserUsername(tokenRequestDto.getUsername()).isPresent()){
+            Client client;
+            client = clientRepository.findByUserUsername(tokenRequestDto.getUsername()).get();
+            //Create token payload
+            claims.put("id", client.getId());
+            claims.put("role", client.getUser().getRole());
+        }else if(adminRepository.findByUserUsername(tokenRequestDto.getUsername()).isPresent()){
+            Admin admin;
+            admin = adminRepository.findByUserUsername(tokenRequestDto.getUsername()).get();
+            claims.put("id", admin.getId());
+            claims.put("role", admin.getUser().getRole());
+        } else if(managerRepository.findByUserUsername(tokenRequestDto.getUsername()).isPresent()){
+            Manager manager;
+            manager = managerRepository.findByUserUsername(tokenRequestDto.getUsername()).get();
+            claims.put("id", manager.getId());
+            claims.put("role", manager.getUser().getRole());
+        } else {
+            throw new NotFoundException(String.format("User with username: %s and password: %s not found.", tokenRequestDto.getUsername(),
+                                tokenRequestDto.getPassword()));
+
+        }
+
         //Generate token
         return new TokenResponseDto(tokenService.generate(claims));
+    }
+
+    @Override
+    public ClaimResponseDto getClaim(TokenResponseDto tokenResponseDto) {
+        Claims claims = tokenService.parseToken(tokenResponseDto.getToken());
+
+        return new ClaimResponseDto(claims.get("id", Integer.class), claims.get("role", String.class));
     }
 
     private void createEmailMessageDto(ClientDto clientDto) {

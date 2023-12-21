@@ -9,4 +9,6 @@ public interface ClientService {
     ClientDto update (ClientUpdateDto clientUpdateDto);
 
     TokenResponseDto login(TokenRequestDto tokenRequestDto);
+
+    ClaimResponseDto getClaim(TokenResponseDto tokenResponseDto);
 }

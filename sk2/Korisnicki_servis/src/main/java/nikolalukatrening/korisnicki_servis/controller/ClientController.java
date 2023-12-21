@@ -46,4 +46,9 @@ public class ClientController {
     public ResponseEntity<TokenResponseDto> loginUser(@RequestBody TokenRequestDto tokenRequestDto) {
         return new ResponseEntity<>(clientService.login(tokenRequestDto), HttpStatus.OK);
     }
+
+    @PostMapping("/login/token")
+    public ResponseEntity<ClaimResponseDto> getClaimsFromToken(@RequestBody TokenResponseDto tokenResponseDto) {
+        return new ResponseEntity<>(clientService.getClaim(tokenResponseDto), HttpStatus.OK);
+    }
 }
