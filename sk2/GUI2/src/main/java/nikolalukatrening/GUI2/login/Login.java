@@ -1,18 +1,25 @@
 package nikolalukatrening.GUI2.login;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.Getter;
 import lombok.Setter;
+import nikolalukatrening.GUI2.client.ClientCreateDto;
+import nikolalukatrening.GUI2.client.ClientDto;
+import nikolalukatrening.GUI2.client.TokenRequestDto;
+import nikolalukatrening.GUI2.client.TokenResponseDto;
 import nikolalukatrening.GUI2.interfaces.AdminInterface;
 import nikolalukatrening.GUI2.interfaces.ClientInterface;
-import org.springframework.http.MediaType;
+import org.springframework.http.*;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
 
 import javax.swing.*;
 import java.awt.*;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -27,19 +34,19 @@ public class Login extends JFrame {
     private JLabel jLabel1, jLabel2, jLabel3, jLabel4;
     private JPasswordField jPasswordField1;
     private JTextField jTextField1;
-    private RestTemplate SignUpServiceRestTemplate;
+
+    private RestTemplate LogInServiceRestTemplate;
     public Login() {
         initComponents();
     }
 
     private void initComponents() {
-        SignUpServiceRestTemplate = new RestTemplate();
+        LogInServiceRestTemplate = new RestTemplate();
         List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
         MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
         converter.setSupportedMediaTypes(Collections.singletonList(MediaType.APPLICATION_JSON));
         messageConverters.add(converter);
-        SignUpServiceRestTemplate.setMessageConverters(messageConverters);
-
+        LogInServiceRestTemplate.setMessageConverters(messageConverters);
 
 
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -70,7 +77,13 @@ public class Login extends JFrame {
         jButton1.setBackground(new Color(0, 102, 102));
         jButton1.setForeground(Color.WHITE);
         jButton1.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        jButton1.addActionListener(evt->jButton1ActionPerformed());
+        jButton1.addActionListener(evt-> {
+            try {
+                jButton1ActionPerformed();
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+        });
 
         jLabel4 = new JLabel("I don't have an account");
         jLabel4.setFont(new Font("Segoe UI", Font.PLAIN, 14));
@@ -103,28 +116,68 @@ public class Login extends JFrame {
 
     private void jButton2ActionPerformed() {
         // Kreiranje instance SignUp prozora
-        SignUp signUpFrame = new SignUp(SignUpServiceRestTemplate);
+        SignUp signUpFrame = new SignUp();
         // Postavljanje SignUp prozora da bude vidljiv
         signUpFrame.setVisible(true);
         // Zatvaranje trenutnog (Login) prozora
         this.dispose();
     }
 
-    private void jButton1ActionPerformed(){
-        if(jTextField1.getText().equals("admin")){
-            AdminInterface adminFrame = new AdminInterface();
-            adminFrame.setVisible(true);
-            this.dispose();
-        } else if(jTextField1.getText().equals("client")){
-            ClientInterface clientInterface = new ClientInterface();
-            clientInterface.setVisible(true);
-            this.dispose();
-        } else if(jTextField1.getText().equals("manager")){
-            //ManagerInterface managerFrame = new ManagerInterface();
-            //managerFrame.setVisible(true);
-            this.dispose();
-        } else {
-            this.dispose();
+    private RequestEntity<TokenRequestDto> TokenRequestDtoRequestEntity() throws JsonProcessingException {
+        String username = jTextField1.getText();
+        String password = String.valueOf(jPasswordField1.getPassword());
+        System.out.println("123" + username + " " + password);
+        TokenRequestDto tokenRequestDto = new TokenRequestDto(username, password);
+
+        // Kreirajte header-e za zahtev
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        RequestEntity<TokenRequestDto> requestEntity = RequestEntity.post(URI.create("http://localhost:8080/api/client/login")).headers(headers).body(tokenRequestDto);
+
+        return requestEntity;
+    }
+
+    private void jButton1ActionPerformed() throws JsonProcessingException {
+//        if(jTextField1.getText().equals("admin")){
+//            AdminInterface adminFrame = new AdminInterface();
+//            adminFrame.setVisible(true);
+//            this.dispose();
+//        } else if(jTextField1.getText().equals("client")){
+//            ClientInterface clientInterface = new ClientInterface();
+//            clientInterface.setVisible(true);
+//            this.dispose();
+//        } else if(jTextField1.getText().equals("manager")){
+//            //ManagerInterface managerFrame = new ManagerInterface();
+//            //managerFrame.setVisible(true);
+//            this.dispose();
+//        } else {
+//            this.dispose();
+//        }
+
+        RequestEntity<TokenRequestDto> requestEntity = TokenRequestDtoRequestEntity();
+
+
+        try {
+            // Pošaljite zahtev koristeći RestTemplate
+            ResponseEntity<TokenResponseDto> response = LogInServiceRestTemplate.exchange(
+                    requestEntity,
+                    TokenResponseDto.class
+            );
+
+            // Obrada odgovora
+            String token = response.getBody().getToken();
+            if (response.getStatusCode() == HttpStatus.OK) {
+                JOptionPane.showMessageDialog(this, "Uspešna prijava!", "Status", JOptionPane.INFORMATION_MESSAGE);
+                ClientInterface clientInterface = new ClientInterface();
+                clientInterface.setVisible(true);
+                this.dispose();
+            } else {
+                JOptionPane.showMessageDialog(this, "Prijava nije uspešna.", "Greška", JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (HttpClientErrorException e) {
+            JOptionPane.showMessageDialog(this, "Greška: " + e.getMessage(), "Greška", JOptionPane.ERROR_MESSAGE);
         }
+
+
     }
 }

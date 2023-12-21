@@ -7,6 +7,8 @@ import lombok.Setter;
 import nikolalukatrening.GUI2.client.ClientCreateDto;
 import nikolalukatrening.GUI2.client.ClientDto;
 import org.springframework.http.*;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -14,6 +16,9 @@ import org.springframework.web.client.RestTemplate;
 import javax.swing.*;
 import java.awt.*;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 @Getter
 @Setter
@@ -26,13 +31,20 @@ public class SignUp extends JFrame {
     private JPasswordField jPasswordField1;
     private JTextField jTextField1, jTextField2,jTextField3,jTextField4,jTextField5 ;
     private RestTemplate SignUpServiceRestTemplate;
-    public SignUp(RestTemplate SignUpServiceRestTemplate) {
-        this.SignUpServiceRestTemplate = SignUpServiceRestTemplate;
+    public SignUp() {
         initComponents();
 
     }
 
     private void initComponents() {
+        // init rest template
+        SignUpServiceRestTemplate = new RestTemplate();
+        List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
+        MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
+        converter.setSupportedMediaTypes(Collections.singletonList(MediaType.APPLICATION_JSON));
+        messageConverters.add(converter);
+        SignUpServiceRestTemplate.setMessageConverters(messageConverters);
+
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setTitle("Sign Up");
         setPreferredSize(new Dimension(400, 700));

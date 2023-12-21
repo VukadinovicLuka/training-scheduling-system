@@ -24,14 +24,14 @@ public class TestDataRunner implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-//        SecretKey key = Keys.secretKeyFor(SignatureAlgorithm.HS512); // Generišete ključ
-//        String base64Key = Base64.getEncoder().encodeToString(key.getEncoded()); // Dobićete Base64 kodiran ključ
-//        System.out.println("JWT Secret: " + base64Key);
+        SecretKey key = Keys.secretKeyFor(SignatureAlgorithm.HS512); // Generišete ključ
+        String base64Key = Base64.getEncoder().encodeToString(key.getEncoded()); // Dobićete Base64 kodiran ključ
+        System.out.println("JWT Secret: " + base64Key);
 
         User user = new User();
         // insert admin
-        user.setUsername("softverskekomponente");
-        user.setPassword("drugiProjekat"); // Šifra treba da bude enkriptovana
+        user.setUsername("admin");
+        user.setPassword("admin"); // Šifra treba da bude enkriptovana
         user.setEmail("softverskekomponente@raf.rs");
         user.setFirstName("Petar");
         user.setLastName("Petrovic");

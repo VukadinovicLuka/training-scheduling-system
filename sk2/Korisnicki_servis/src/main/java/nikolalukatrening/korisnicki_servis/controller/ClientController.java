@@ -43,7 +43,7 @@ public class ClientController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<TokenResponseDto> loginUser(@RequestBody @Valid TokenRequestDto tokenRequestDto) {
+    public ResponseEntity<TokenResponseDto> loginUser(@RequestBody TokenRequestDto tokenRequestDto) {
         return new ResponseEntity<>(clientService.login(tokenRequestDto), HttpStatus.OK);
     }
 }
