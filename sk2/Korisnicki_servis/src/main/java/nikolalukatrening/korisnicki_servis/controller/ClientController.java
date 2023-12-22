@@ -27,6 +27,15 @@ public class ClientController {
         this.clientRepository = clientRepository;
     }
 
+
+    @GetMapping("/all")
+    public ResponseEntity<List<Client>> getAllClients() {
+//        List<ClientAdminDto> clients = clientRepository.findAll().stream()
+//                .collect(Collectors.toList());
+
+        return new ResponseEntity<>(clientService.getAllClients(), HttpStatus.OK);
+    }
+
     @PostMapping("/activate/token")
     public ResponseEntity<String> activateClient(@RequestParam String token) {
         Optional<Client> clientOptional = clientRepository.findByActivationToken(token);
@@ -61,6 +70,10 @@ public class ClientController {
         return new ResponseEntity<>(clientService.update(clientUpdateDto), HttpStatus.OK);
     }
 
+    @PutMapping("/activationUpdate")
+    public ResponseEntity<ClientAdminDto> updateClient(@RequestBody @Valid ClientAdminDto clientAdminDto){
+        return new ResponseEntity<>(clientService.updateClientActivation(clientAdminDto), HttpStatus.OK);
+    }
     @PostMapping("/login")
     public ResponseEntity<TokenResponseDto> loginUser(@RequestBody TokenRequestDto tokenRequestDto) {
         return new ResponseEntity<>(clientService.login(tokenRequestDto), HttpStatus.OK);

@@ -13,6 +13,7 @@ public interface ClientRepository extends JpaRepository<Client,Long> {
     Optional<Client> findByUserUsername(String username);
 
     Optional<Client> findById (Long id);
+
     Optional<Client> findByUser_UsernameAndUser_Password(String username, String password);
 
     Optional<Client> findByActivationToken (String token);

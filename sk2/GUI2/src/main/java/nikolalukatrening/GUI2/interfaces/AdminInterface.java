@@ -1,10 +1,22 @@
 package nikolalukatrening.GUI2.interfaces;
 
+import nikolalukatrening.GUI2.client.ClientProfileEditorDto;
+import nikolalukatrening.GUI2.client.TokenRequestDto;
+import nikolalukatrening.GUI2.client.UserDto;
+import nikolalukatrening.GUI2.customTable.CustomTable;
+import org.springframework.boot.autoconfigure.security.SecurityProperties;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.*;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.web.client.RestTemplate;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.util.HashSet;
-import java.util.Set;
+import java.net.URI;
+import java.util.*;
+import java.util.List;
 
 public class AdminInterface extends JFrame {
 
@@ -13,10 +25,12 @@ public class AdminInterface extends JFrame {
     private JToolBar toolBar = new JToolBar();
     private JPanel clientsPanel = new JPanel(new BorderLayout());
     private JPanel managersPanel = new JPanel(new BorderLayout());
-    private Set<Integer> highlightedRowsClients = new HashSet<>();
-    private Set<Integer> highlightedRowsManagers = new HashSet<>();
-    private JTable clientsTable;
+    private CustomTable clientsTable;
     private JTable managersTable;
+
+    private RestTemplate adminServiceRestTemplate;
+    private RestTemplate activationServiceRestTemplate;
+
 
     public AdminInterface() {
         setTitle("Admin Interfejs");
@@ -47,24 +61,63 @@ public class AdminInterface extends JFrame {
         toolBar.add(managersButton);
 
         JButton searchButton = new JButton("Zabrani");
-        searchButton.addActionListener(e -> highlightRow());
+        searchButton.addActionListener(e -> zabrani());
         toolBar.add(searchButton);
 
         JButton resetColorButton = new JButton("Odblokiraj");
-        resetColorButton.addActionListener(e -> resetRowColor());
+        resetColorButton.addActionListener(e -> odblokiraj());
         toolBar.add(resetColorButton);
     }
 
     private void setupClientsPanel() {
-        String[] clientColumns = new String[]{"id", "username", "email", "firstName", "lastName", "dateOfBirth", "reservedTraining"};
-        Object[][] clientData = {
-                {"1", "klijent1", "klijent1@email.com", "Ime1", "Prezime1", "01-01-1990", "Da"},
-                {"2", "klijent2", "klijent2@email.com", "Ime2", "Prezime2", "02-02-1991", "Ne"},
-                {"3", "klijent3", "klijent3@email.com", "Ime3", "Prezime3", "03-03-1992", "Da"}
-        };
-        DefaultTableModel clientsModel = new DefaultTableModel(clientData, clientColumns);
-        clientsTable = new JTable(clientsModel);
-        clientsPanel.add(new JScrollPane(clientsTable), BorderLayout.CENTER);
+        String[] clientColumns = new String[]{"id", "username", "email", "firstName", "lastName", "dateOfBirth", "reservedTraining", "cardNumber", "isActivated", "password", "activationToken", "role"};
+
+        adminServiceRestTemplate = new RestTemplate();
+        List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
+        MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
+        converter.setSupportedMediaTypes(Collections.singletonList(MediaType.APPLICATION_JSON));
+        messageConverters.add(converter);
+        adminServiceRestTemplate.setMessageConverters(messageConverters);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
+        ResponseEntity<List<ClientProfileEditorDto>> response = adminServiceRestTemplate.exchange(
+                "http://localhost:8080/api/client/all",
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<List<ClientProfileEditorDto>>() {});
+        List<ClientProfileEditorDto> clients = response.getBody();
+
+        // Create a data model for the table
+        DefaultTableModel clientsModel = new DefaultTableModel(clientColumns, 0);
+
+        // Populate the model with client data
+        for (ClientProfileEditorDto client : clients) {
+            Object[] row = new Object[]{
+                    client.getId(),
+                    client.getUser().getUsername(),
+                    client.getUser().getEmail(),
+                    client.getUser().getFirstName(),
+                    client.getUser().getLastName(),
+                    client.getUser().getDateOfBirth(),
+                    client.getReservedTraining(),
+                    client.getCardNumber(),
+                    client.getIsActivated(),
+                    client.getUser().getPassword(),
+                    client.getActivationToken(),
+                    client.getUser().getRole()
+            };
+            clientsModel.addRow(row);
+//            if (client.getIsActivated() == false) {
+//                highlightedRowsClients.add(clientsModel.getRowCount() - 1);
+//            }
+        }
+
+        // Set the model to the JTable and add it to the JScrollPane
+        clientsTable = new CustomTable(clientsModel);
+        JScrollPane scrollPane = new JScrollPane(clientsTable);
+        clientsPanel.add(scrollPane, BorderLayout.CENTER);
     }
 
     private void setupManagersPanel() {
@@ -79,80 +132,103 @@ public class AdminInterface extends JFrame {
         managersPanel.add(new JScrollPane(managersTable), BorderLayout.CENTER);
     }
 
-    private void highlightRowByUsername(JTable table, String username, Set<Integer> highlightedRows) {
-        DefaultTableModel model = (DefaultTableModel) table.getModel();
-        int usernameColumn = -1;
-        for (int i = 0; i < model.getColumnCount(); i++) {
-            if ("username".equals(model.getColumnName(i))) {
-                usernameColumn = i;
-                break;
-            }
-        }
-        if (usernameColumn != -1) {
-            for (int i = 0; i < model.getRowCount(); i++) {
-                if (model.getValueAt(i, usernameColumn).equals(username)) {
-                    highlightedRows.add(i);
-                }
-            }
-        }
-
-        table.clearSelection();
-        for (Integer row : highlightedRows) {
-            table.addRowSelectionInterval(row, row);
-        }
-        table.setSelectionBackground(Color.RED);
-    }
-
-    private void highlightRow() {
+    private void odblokiraj(){
         String username = JOptionPane.showInputDialog(this, "Unesite username:");
-        if (username != null && !username.trim().isEmpty()) {
-            highlightRowByUsername(clientsTable, username, highlightedRowsClients);
-            highlightRowByUsername(managersTable, username, highlightedRowsManagers);
+        if (username == null) {
+            return;
         }
-    }
-
-    private void resetRowColor() {
-        String username = JOptionPane.showInputDialog(this, "Unesite username za resetovanje boje:");
-        if (username != null && !username.trim().isEmpty()) {
-            resetRowColorByUsername(clientsTable, username, highlightedRowsClients);
-            resetRowColorByUsername(managersTable, username, highlightedRowsManagers);
+        if (username.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Morate uneti username!");
+            return;
         }
-    }
 
-    private void resetRowColorByUsername(JTable table, String username, Set<Integer> highlightedRows) {
-        DefaultTableModel model = (DefaultTableModel) table.getModel();
-        int usernameColumn = -1;
-        boolean isHighlighted = false;
 
-        for (int i = 0; i < model.getColumnCount(); i++) {
-            if ("username".equals(model.getColumnName(i))) {
-                usernameColumn = i;
+        // izvlacenje reda iz tabele na osnovu username-a
+        int row = -1;
+        for (int i = 0; i < clientsTable.getRowCount(); i++) {
+            if (clientsTable.getValueAt(i, 1).equals(username)) {
+                row = i;
                 break;
             }
         }
+        if (row == -1) {
+            JOptionPane.showMessageDialog(this, "Ne postoji korisnik sa unetim username-om!");
+            return;
+        }
 
-        if (usernameColumn != -1) {
-            for (int i = 0; i < model.getRowCount(); i++) {
-                if (model.getValueAt(i, usernameColumn).equals(username)) {
-                    if (highlightedRows.contains(i)) {
-                        highlightedRows.remove(i);
-                        isHighlighted = true;
-                    }
-                    break; // Prekidamo petlju jer smo našli odgovarajući red
-                }
-            }
-        }
-        // Osvežavanje prikaza
-        table.clearSelection();
-        for (Integer row : highlightedRows) {
-            table.addRowSelectionInterval(row, row);
-        }
-        table.setSelectionBackground(Color.RED);
+        // izvuci mi sve podatke iz tabele na osnovu reda
+        String id = clientsTable.getValueAt(row, 0).toString();
+        String username1 = clientsTable.getValueAt(row, 1).toString();
+        String email = clientsTable.getValueAt(row, 2).toString();
+        String firstName = clientsTable.getValueAt(row, 3).toString();
+        String lastName = clientsTable.getValueAt(row, 4).toString();
+        String dateOfBirth = clientsTable.getValueAt(row, 5).toString();
+        String reservedTraining = clientsTable.getValueAt(row, 6).toString();
+        String cardNumber = clientsTable.getValueAt(row, 7).toString();
+        String isActivated = clientsTable.getValueAt(row, 8).toString();
+        String password = clientsTable.getValueAt(row, 9).toString();
+        String activationToken = clientsTable.getValueAt(row, 10).toString();
+        String role = clientsTable.getValueAt(row, 11).toString();
 
-        // Prikazivanje poruke ako korisnik nije bio blokiran
-        if (!isHighlighted) {
-            JOptionPane.showMessageDialog(this, "Korisnik '" + username + "' nije blokiran.", "Informacija", JOptionPane.INFORMATION_MESSAGE);
+        UserDto user = new UserDto();
+        user.setUsername(username1);
+        user.setEmail(email);
+        user.setFirstName(firstName);
+        user.setLastName(lastName);
+        user.setDateOfBirth(dateOfBirth);
+        user.setPassword(password);
+        user.setRole(role);
+
+
+        // napravi objekat od tih podataka
+        ClientProfileEditorDto client = new ClientProfileEditorDto();
+        client.setId(Long.parseLong(id));
+        client.setReservedTraining(Integer.valueOf(reservedTraining));
+        client.setCardNumber(Integer.valueOf(cardNumber));
+        client.setIsActivated(Boolean.valueOf(isActivated));
+        client.setActivationToken(activationToken);
+        client.setUser(user);
+
+
+
+
+
+
+
+        activationServiceRestTemplate = new RestTemplate();
+        List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
+        MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
+        converter.setSupportedMediaTypes(Collections.singletonList(MediaType.APPLICATION_JSON));
+        messageConverters.add(converter);
+        activationServiceRestTemplate.setMessageConverters(messageConverters);
+
+
+        // Kreirajte header-e za zahtev
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        RequestEntity<ClientProfileEditorDto> requestEntity = RequestEntity.put(URI.create("http://localhost:8080/api/client/activationUpdate")).headers(headers).body(client);
+
+
+        // Posaljite zahtev
+        ResponseEntity<ClientProfileEditorDto> responseEntity = activationServiceRestTemplate.exchange(requestEntity, ClientProfileEditorDto.class);
+        Boolean isActivated1 = responseEntity.getBody().getIsActivated(); // ovo je true
+
+        // hocu da isActivated u tabeli bude vrednost isActivated1
+        clientsTable.setValueAt(isActivated1, row, 8);
+        // refreshujem tabelu
+        clientsTable.repaint();
+    }
+
+    private void zabrani(){
+        String username = JOptionPane.showInputDialog(this, "Unesite username:");
+        if (username == null) {
+            return;
         }
+        if (username.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Morate uneti username!");
+            return;
+        }
+
     }
 
 }

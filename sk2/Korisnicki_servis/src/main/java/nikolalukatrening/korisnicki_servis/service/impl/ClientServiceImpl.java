@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -111,6 +112,19 @@ public class ClientServiceImpl implements ClientService {
         Claims claims = tokenService.parseToken(tokenResponseDto.getToken());
 
         return new ClaimResponseDto(claims.get("id", Integer.class), claims.get("role", String.class));
+    }
+
+    @Override
+    public List<Client> getAllClients() {
+        return clientRepository.findAll();
+    }
+
+    @Override
+    public ClientAdminDto updateClientActivation(ClientAdminDto clientAdminDto) {
+        Client client = clientRepository.findByUserUsername(clientAdminDto.getUser().getUsername()).orElseThrow(()->new RuntimeException());
+        client.setIsActivated(true);
+        clientRepository.save(client);
+        return clientMapper.clientToClientAdminDto(client);
     }
 
     private void createEmailMessageDto(ClientDto clientDto,String activationToken) {

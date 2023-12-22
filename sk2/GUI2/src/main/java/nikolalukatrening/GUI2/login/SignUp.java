@@ -186,7 +186,7 @@ public class SignUp extends JFrame {
 
             // Obrada odgovora
             if (response.getStatusCode() == HttpStatus.CREATED) {
-                JOptionPane.showMessageDialog(this, "Uspešna registracija!", "Status", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Uspešna registracija! Idite na gmail da validirate nalog!", "Status", JOptionPane.INFORMATION_MESSAGE);
                 // vrati me nazad na login
                 Login loginFrame = new Login();
                 loginFrame.setVisible(true);

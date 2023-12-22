@@ -61,6 +61,11 @@ public class ProfileEditor extends JPanel {
         addLabelAndTextField("Rezervisani treninzi:", 7,(reservedTrainingsField));
         addLabelAndTextField("Email:", 8, emailField);
 
+        cardNumberField.setEditable(false);
+        cardNumberField.setEnabled(false);
+        reservedTrainingsField.setEditable(false);
+        reservedTrainingsField.setEnabled(false);
+
         // Dugme za potvrdu izmena
         JButton btnConfirm = new JButton("Potvrdi izmene");
         btnConfirm.setFont(new Font("SansSerif", Font.BOLD, 18));

@@ -1,8 +1,6 @@
 package nikolalukatrening.korisnicki_servis.mapper;
 
-import nikolalukatrening.korisnicki_servis.dto.ClientCreateDto;
-import nikolalukatrening.korisnicki_servis.dto.ClientDto;
-import nikolalukatrening.korisnicki_servis.dto.ClientUpdateDto;
+import nikolalukatrening.korisnicki_servis.dto.*;
 import nikolalukatrening.korisnicki_servis.model.Client;
 import nikolalukatrening.korisnicki_servis.model.User;
 import org.springframework.stereotype.Component;
@@ -20,6 +18,28 @@ public class ClientMapper {
         clientDto.setLastName(client.getUser().getLastName());
         clientDto.setDateOfBirth(client.getUser().getDateOfBirth());
         clientDto.setReservedTraining(client.getReservedTraining());
+        return clientDto;
+    }
+
+    public ClientAdminDto clientToClientAdminDto(Client client) {
+        UserDto user = new UserDto();
+        user.setUsername(client.getUser().getUsername());
+        user.setEmail(client.getUser().getEmail());
+        user.setFirstName(client.getUser().getFirstName());
+        user.setLastName(client.getUser().getLastName());
+        user.setDateOfBirth(client.getUser().getDateOfBirth());
+        user.setRole(client.getUser().getRole());
+        user.setPassword(client.getUser().getPassword());
+
+
+        ClientAdminDto clientDto = new ClientAdminDto();
+        clientDto.setId(client.getId());
+        clientDto.setReservedTraining(client.getReservedTraining());
+        clientDto.setIsActivated(client.getIsActivated());
+        clientDto.setCardNumber(client.getCardNumber());
+        clientDto.setActivationToken(client.getActivationToken());
+        clientDto.setUser(user);
+
         return clientDto;
     }
 

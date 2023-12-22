@@ -178,30 +178,24 @@ public class Login extends JFrame {
                     adminFrame.setVisible(true);
                     this.dispose();
                 } else if(claims.getRole().equals("ROLE_CLIENT")){
-//                    HttpHeaders headers = new HttpHeaders();
-//                    headers.setContentType(MediaType.APPLICATION_JSON);
-//                    HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
-//                    ResponseEntity<ClientLogInDto> responseForClient = LogInServiceRestTemplate.exchange(
-//                            "http://localhost:8080/api/client/"+claims.getId() ,
-//                            HttpMethod.GET,
-//                            entity,
-//                            ClientLogInDto.class);
 
-                     Integer userId = claims.getId();
+                    Integer userId = claims.getId();
+                    HttpHeaders headers = new HttpHeaders();
+                    headers.setContentType(MediaType.APPLICATION_JSON);
+                    HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
+                    ResponseEntity<ClientProfileEditorDto> responseForClient = LogInServiceRestTemplate.exchange(
+                            "http://localhost:8080/api/client/" +userId,
+                            HttpMethod.GET,
+                            entity,
+                            ClientProfileEditorDto.class);
+
+                    if (!responseForClient.getBody().getIsActivated()){
+                        JOptionPane.showMessageDialog(this, "Nalog nije aktiviran!", "Greška", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
                      ClientInterface clientInterface = new ClientInterface(userId);
                      clientInterface.setVisible(true);
                      this.dispose();
-//                    System.out.println(responseForClient.getBody().getUser().getEmail());
-//                    profileEditor.setCardNumberField(responseForClient.getBody().getCardNumber());
-//                    profileEditor.setEmailField(responseForClient.getBody().getUser().getEmail());
-//                    profileEditor.setDateOfBirthField(responseForClient.getBody().getUser().getDateOfBirth());
-//                    profileEditor.setPasswordField(responseForClient.getBody().getUser().getPassword());
-//                    profileEditor.setFirstNameField(responseForClient.getBody().getUser().getFirstName());
-//                    profileEditor.setLastNameField(responseForClient.getBody().getUser().getLastName());
-//                    profileEditor.setUsernameField(responseForClient.getBody().getUser().getUsername());
-//                    profileEditor.setReservedTrainingsField(responseForClient.getBody().getReservedTraining());
-                      clientInterface.setVisible(true);
-                      this.dispose();
                 } else if(claims.getRole().equals("ROLE_MANAGER")){
 //                    ManagerInterface managerFrame = new ManagerInterface();
 //                    managerFrame.setVisible(true);
