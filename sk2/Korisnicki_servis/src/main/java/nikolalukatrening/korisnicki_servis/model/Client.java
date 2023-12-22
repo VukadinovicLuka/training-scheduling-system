@@ -16,7 +16,7 @@ public class Client {
     private Integer cardNumber;
     private Integer reservedTraining;
     private Boolean isActivated;
-
+    private String activationToken;
     @Embedded
     private User user;
 

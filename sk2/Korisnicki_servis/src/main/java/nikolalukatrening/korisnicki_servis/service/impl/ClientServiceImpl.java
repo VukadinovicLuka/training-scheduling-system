@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 @Transactional
@@ -54,13 +55,12 @@ public class ClientServiceImpl implements ClientService {
     @Override
     public ClientDto add(ClientCreateDto clientCreateDto) {
         Client client = clientMapper.clientCreateDtoToClient(clientCreateDto);
-        ClientDto clientDto = clientMapper.clientToClientDto(client);
-        createEmailMessageDto(clientDto);
+        client.setIsActivated(false);
+        client.setActivationToken(UUID.randomUUID().toString());
         clientRepository.save(client);
+        ClientDto clientDto = clientMapper.clientToClientDto(client);
 
-//        EmailMessageDto emailMessage = new EmailMessageDto(clientDto.getEmail(), "Activation Email", "Please activate your account...");
-//        jmsTemplate.convertAndSend(activationDestination, messageHelper.createTextMessage(emailMessage));
-        // createTextMessage konvertuje objekat u JSON string koristeći ObjectMapper
+        createEmailMessageDto(clientDto,client.getActivationToken());
         return clientDto;
     }
 
@@ -113,20 +113,21 @@ public class ClientServiceImpl implements ClientService {
         return new ClaimResponseDto(claims.get("id", Integer.class), claims.get("role", String.class));
     }
 
-    private void createEmailMessageDto(ClientDto clientDto) {
+    private void createEmailMessageDto(ClientDto clientDto,String activationToken) {
         Map<String, String> params = new HashMap<>();
         params.put("ime", clientDto.getFirstName());
         params.put("prezime", clientDto.getLastName());
-        params.put("link", "http://link.za.aktivaciju.com/aktivacija");
+        params.put("link", "http://localhost:8080/api/swagger-ui/index.html");
         EmailMessageDto emailMessage = new EmailMessageDto(
                 clientDto.getEmail(),
                 "Activation Email",
-                "Pozdrav," + params.get("ime") + " " + params.get("prezime") + ",da biste nastavili verifikaciju idite na link:"
-                 + params.get("link"),
+                "Pozdrav," + params.get("ime") + " " + params.get("prezime") + ",da biste nastavili verifikaciju idite na link: "
+                        + params.get("link") + "\n" + "Uputstvo za verifikaciju: klikom na client/activate/token, izaci ce Vam dugme try it out. Klikente na to" +
+                        "dugme i unesete token koji se nalazi u nastavku." + "\n" + "Token: " + activationToken,
                 "ACTIVATION",
                 params
         );
-//        jmsTemplate.convertAndSend(activationDestination, messageHelper.createTextMessage(emailMessage));
+        jmsTemplate.convertAndSend(activationDestination, messageHelper.createTextMessage(emailMessage));
     }
 
 }

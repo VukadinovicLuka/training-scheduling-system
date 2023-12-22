@@ -4,8 +4,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.Getter;
 import lombok.Setter;
 import nikolalukatrening.GUI2.client.*;
+import nikolalukatrening.GUI2.clientViews.ProfileEditor;
 import nikolalukatrening.GUI2.interfaces.AdminInterface;
 import nikolalukatrening.GUI2.interfaces.ClientInterface;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.*;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -58,7 +60,7 @@ public class Login extends JFrame {
         jLabel1.setFont(new Font("Segoe UI", Font.BOLD, 36));
         jLabel1.setForeground(new Color(0, 102, 102));
 
-        jLabel2 = new JLabel("Email");
+        jLabel2 = new JLabel("Username");
         jLabel2.setFont(new Font("Segoe UI", Font.PLAIN, 14));
 
         jTextField1 = new JTextField(20);
@@ -166,6 +168,7 @@ public class Login extends JFrame {
                     ClaimsResponseDto.class
             );
 
+
             if (responseForClaims.getStatusCode() == HttpStatus.OK) {
 //                JOptionPane.showMessageDialog(this, "Uspešna prijava!", "Status", JOptionPane.INFORMATION_MESSAGE);
                 ClaimsResponseDto claims = responseForClaims.getBody();
@@ -175,9 +178,30 @@ public class Login extends JFrame {
                     adminFrame.setVisible(true);
                     this.dispose();
                 } else if(claims.getRole().equals("ROLE_CLIENT")){
-                    ClientInterface clientInterface = new ClientInterface();
-                    clientInterface.setVisible(true);
-                    this.dispose();
+//                    HttpHeaders headers = new HttpHeaders();
+//                    headers.setContentType(MediaType.APPLICATION_JSON);
+//                    HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
+//                    ResponseEntity<ClientLogInDto> responseForClient = LogInServiceRestTemplate.exchange(
+//                            "http://localhost:8080/api/client/"+claims.getId() ,
+//                            HttpMethod.GET,
+//                            entity,
+//                            ClientLogInDto.class);
+
+                     Integer userId = claims.getId();
+                     ClientInterface clientInterface = new ClientInterface(userId);
+                     clientInterface.setVisible(true);
+                     this.dispose();
+//                    System.out.println(responseForClient.getBody().getUser().getEmail());
+//                    profileEditor.setCardNumberField(responseForClient.getBody().getCardNumber());
+//                    profileEditor.setEmailField(responseForClient.getBody().getUser().getEmail());
+//                    profileEditor.setDateOfBirthField(responseForClient.getBody().getUser().getDateOfBirth());
+//                    profileEditor.setPasswordField(responseForClient.getBody().getUser().getPassword());
+//                    profileEditor.setFirstNameField(responseForClient.getBody().getUser().getFirstName());
+//                    profileEditor.setLastNameField(responseForClient.getBody().getUser().getLastName());
+//                    profileEditor.setUsernameField(responseForClient.getBody().getUser().getUsername());
+//                    profileEditor.setReservedTrainingsField(responseForClient.getBody().getReservedTraining());
+                      clientInterface.setVisible(true);
+                      this.dispose();
                 } else if(claims.getRole().equals("ROLE_MANAGER")){
 //                    ManagerInterface managerFrame = new ManagerInterface();
 //                    managerFrame.setVisible(true);
@@ -188,22 +212,8 @@ public class Login extends JFrame {
             } else {
                 JOptionPane.showMessageDialog(this, "GRESKA KOD PARSOVANJA TOKENA U CLAIMOVE", "Greška", JOptionPane.ERROR_MESSAGE);
             }
-
-
-
-
-//            if (responseForToken.getStatusCode() == HttpStatus.OK) {
-//                JOptionPane.showMessageDialog(this, "Uspešna prijava!", "Status", JOptionPane.INFORMATION_MESSAGE);
-////                ClientInterface clientInterface = new ClientInterface();
-////                clientInterface.setVisible(true);
-////                this.dispose();
-//            } else {
-//                JOptionPane.showMessageDialog(this, "Prijava nije uspešna.", "Greška", JOptionPane.ERROR_MESSAGE);
-//            }
         } catch (HttpClientErrorException e) {
             JOptionPane.showMessageDialog(this, "Greška: " + e.getMessage(), "Greška", JOptionPane.ERROR_MESSAGE);
         }
-
-
     }
 }

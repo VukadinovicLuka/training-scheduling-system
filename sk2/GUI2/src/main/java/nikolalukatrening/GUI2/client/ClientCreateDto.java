@@ -2,10 +2,12 @@ package nikolalukatrening.GUI2.client;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
+
 public class ClientCreateDto {
 
     @JsonProperty("username")
