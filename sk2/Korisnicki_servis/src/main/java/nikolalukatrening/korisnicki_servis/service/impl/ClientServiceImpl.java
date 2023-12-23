@@ -131,6 +131,27 @@ public class ClientServiceImpl implements ClientService {
         return clientMapper.clientToClientAdminDto(client);
     }
 
+    @Override
+    public ClientAdminDto updateClientById(Long id, ClientAdminDto clientAdminDto) {
+        //  clientRepository.findById(id)
+        Client client = clientRepository.findById(id).orElseThrow(()->new RuntimeException());
+        client.getUser().setUsername(clientAdminDto.getUser().getUsername());
+        client.getUser().setPassword(clientAdminDto.getUser().getPassword());
+        client.getUser().setRole(clientAdminDto.getUser().getRole());
+        client.getUser().setFirstName(clientAdminDto.getUser().getFirstName());
+        client.getUser().setLastName(clientAdminDto.getUser().getLastName());
+        client.getUser().setEmail(clientAdminDto.getUser().getEmail());
+        client.setActivationToken(clientAdminDto.getActivationToken());
+        client.setIsActivated(clientAdminDto.getIsActivated());
+        client.setCardNumber(clientAdminDto.getCardNumber());
+        client.setReservedTraining(clientAdminDto.getReservedTraining());
+        client.setId(id);
+
+
+        clientRepository.save(client);
+        return clientMapper.clientToClientAdminDto(client);
+    }
+
     private void createEmailMessageDto(ClientDto clientDto,String activationToken) {
         Map<String, String> params = new HashMap<>();
         params.put("ime", clientDto.getFirstName());

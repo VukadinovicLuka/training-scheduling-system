@@ -19,4 +19,6 @@ public interface ClientService {
 
     ClientAdminDto updateClientActivation(ClientAdminDto clientAdminDto);
 
+    ClientAdminDto updateClientById(Long id, ClientAdminDto clientAdminDto);
+
 }

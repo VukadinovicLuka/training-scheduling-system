@@ -46,7 +46,7 @@ public class ClientController {
 
         Client client = clientOptional.get();
         client.setIsActivated(true);
-        client.setActivationToken(null);
+        client.setActivationToken(null); // ?
         clientRepository.save(client);
         return new ResponseEntity<>("Nalog je uspešno aktiviran.", HttpStatus.OK);
     }
@@ -68,6 +68,12 @@ public class ClientController {
     @PutMapping
     public ResponseEntity<ClientDto> updateClient(@RequestBody @Valid ClientUpdateDto clientUpdateDto){
         return new ResponseEntity<>(clientService.update(clientUpdateDto), HttpStatus.OK);
+    }
+
+    // dodaj metodu za client update po id
+    @PutMapping("/{id}")
+    public ResponseEntity<ClientAdminDto> updateClientById(@PathVariable Long id, @RequestBody @Valid ClientAdminDto clientAdminDto){
+        return new ResponseEntity<>(clientService.updateClientById(id, clientAdminDto), HttpStatus.OK);
     }
 
     @PutMapping("/activationUpdate")

@@ -12,6 +12,8 @@ import org.springframework.web.client.RestTemplate;
 
 import javax.swing.*;
 import java.awt.*;
+import java.net.Socket;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -33,6 +35,7 @@ public class ProfileEditor extends JPanel {
 
     private RestTemplateServiceImpl restTemplateServiceImpl;
     private Integer id;
+    private ClientProfileEditorDto client;
     public ProfileEditor() {
         this.restTemplateServiceImpl = new RestTemplateServiceImpl();
         usernameField = new JTextField(15);
@@ -91,6 +94,7 @@ public class ProfileEditor extends JPanel {
 
 
     public void loadProfileData(Integer id) {
+        this.id = id;
         ProfileEditorServiceRestTemplate = new RestTemplate();
         List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
         MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
@@ -106,6 +110,9 @@ public class ProfileEditor extends JPanel {
                 HttpMethod.GET,
                 entity,
                 ClientProfileEditorDto.class);
+        this.client = responseForClient.getBody(); // klijent koji je ulogovan
+        client.setActivationToken(responseForClient.getBody().getActivationToken());
+        System.out.println("client ATIVACIONI TOKEN: " + client.getActivationToken());
         setCardNumberField(responseForClient.getBody().getCardNumber());
         setEmailField(responseForClient.getBody().getUser().getEmail());
         setDateOfBirthField(responseForClient.getBody().getUser().getDateOfBirth());
@@ -144,34 +151,38 @@ public class ProfileEditor extends JPanel {
         userDto.setFirstName(firstNameField.getText());
         userDto.setLastName(lastNameField.getText());
         userDto.setDateOfBirth(dateOfBirthField.getText());
+        userDto.setRole(client.getUser().getRole());
         ClientProfileEditorDto clientToUpdate = new ClientProfileEditorDto();
         clientToUpdate.setUser(userDto);
         clientToUpdate.setCardNumber(Integer.parseInt(cardNumberField.getText()));
         clientToUpdate.setReservedTraining(Integer.parseInt(reservedTrainingsField.getText()));
         clientToUpdate.setId(Long.valueOf(id));
-        // proveriti ovde da li jos nesto fali, tipa aktivacioni token i sl
+        System.out.println("Aktivacioni token: " + client.getActivationToken());
+        clientToUpdate.setActivationToken(client.getActivationToken());
+        clientToUpdate.setIsActivated(client.getIsActivated());
 
+        // proveriti ovde da li jos nesto fali, tipa aktivacioni token i sl
+        System.out.println("Klijent koji se salje na server: " + clientToUpdate.toString());
         clientEditorRestTemplate = restTemplateServiceImpl.setupRestTemplate(clientEditorRestTemplate);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<ClientProfileEditorDto> requestEntity = new HttpEntity<>(clientToUpdate, headers);
+        RequestEntity<ClientProfileEditorDto> requestEntity = RequestEntity.put(URI.create("http://localhost:8080/api/client/" + id)).headers(headers).body(clientToUpdate);
 
-        try {
-            ResponseEntity<String> response = ProfileEditorServiceRestTemplate.exchange(
-                    "http://localhost:8080/api/client/update", // Pretpostavljam da je ovo endpoint za ažuriranje
-                    HttpMethod.PUT,
-                    requestEntity,
-                    String.class);
 
-            if (response.getStatusCode() == HttpStatus.OK) {
-                JOptionPane.showMessageDialog(this, "Podaci su uspešno ažurirani.", "Uspeh", JOptionPane.INFORMATION_MESSAGE);
-            } else {
-                JOptionPane.showMessageDialog(this, "Došlo je do greške prilikom ažuriranja.", "Greška", JOptionPane.ERROR_MESSAGE);
-            }
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Greška u komunikaciji sa serverom: " + ex.getMessage(), "Greška", JOptionPane.ERROR_MESSAGE);
+
+
+        // Posaljite zahtev
+        ResponseEntity<ClientProfileEditorDto> responseEntity = clientEditorRestTemplate.exchange(requestEntity, ClientProfileEditorDto.class);
+
+        // Proverite odgovor servera
+        if (responseEntity.getStatusCode() == HttpStatus.OK) {
+            JOptionPane.showMessageDialog(null, "Uspesno ste izmenili profil!");
+            loadProfileData(id); // id korisnika je dobar
+        } else {
+            JOptionPane.showMessageDialog(null, "Doslo je do greske pri izmeni profila!");
         }
+
     }
 
 

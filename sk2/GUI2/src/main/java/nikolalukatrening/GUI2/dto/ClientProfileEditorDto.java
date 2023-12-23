@@ -30,6 +30,18 @@ public class ClientProfileEditorDto {
 
     // getters and setters
 
+
+    @Override
+    public String toString() {
+        return "ClientProfileEditorDto{" +
+                "id=" + id +
+                ", cardNumber=" + cardNumber +
+                ", reservedTraining=" + reservedTraining +
+                ", isActivated=" + isActivated +
+                ", activationToken='" + activationToken + '\'' +
+                ", user=" + user +
+                '}';
+    }
 }
 
 
