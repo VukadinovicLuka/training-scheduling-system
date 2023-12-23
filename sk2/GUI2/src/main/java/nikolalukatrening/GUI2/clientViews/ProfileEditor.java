@@ -2,7 +2,9 @@ package nikolalukatrening.GUI2.clientViews;
 
 import lombok.Getter;
 import lombok.Setter;
-import nikolalukatrening.GUI2.client.ClientProfileEditorDto;
+import nikolalukatrening.GUI2.dto.ClientProfileEditorDto;
+import nikolalukatrening.GUI2.dto.UserDto;
+import nikolalukatrening.GUI2.service.impl.RestTemplateServiceImpl;
 import org.springframework.http.*;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -27,8 +29,12 @@ public class ProfileEditor extends JPanel {
     private JTextField reservedTrainingsField;
     private JTextField emailField;
     private RestTemplate ProfileEditorServiceRestTemplate;
+    private RestTemplate clientEditorRestTemplate;
+
+    private RestTemplateServiceImpl restTemplateServiceImpl;
     private Integer id;
     public ProfileEditor() {
+        this.restTemplateServiceImpl = new RestTemplateServiceImpl();
         usernameField = new JTextField(15);
         lastNameField = new JTextField(15);
         firstNameField = new JTextField(15);
@@ -73,6 +79,7 @@ public class ProfileEditor extends JPanel {
         btnConfirm.setForeground(Color.WHITE);
         btnConfirm.setFocusPainted(false);
         btnConfirm.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnConfirm.addActionListener(e -> confirmChanges());
         gbc.gridwidth = 2;
         gbc.gridx = 0;
         gbc.gridy = 9;
@@ -126,6 +133,45 @@ public class ProfileEditor extends JPanel {
         gbc.anchor = GridBagConstraints.LINE_START;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         add(textField, gbc);
+    }
+
+    private void confirmChanges() {
+        // sakupljanje podataka iz polja
+        UserDto userDto = new UserDto();
+        userDto.setUsername(usernameField.getText());
+        userDto.setPassword(passwordField.getText());
+        userDto.setEmail(emailField.getText());
+        userDto.setFirstName(firstNameField.getText());
+        userDto.setLastName(lastNameField.getText());
+        userDto.setDateOfBirth(dateOfBirthField.getText());
+        ClientProfileEditorDto clientToUpdate = new ClientProfileEditorDto();
+        clientToUpdate.setUser(userDto);
+        clientToUpdate.setCardNumber(Integer.parseInt(cardNumberField.getText()));
+        clientToUpdate.setReservedTraining(Integer.parseInt(reservedTrainingsField.getText()));
+        clientToUpdate.setId(Long.valueOf(id));
+        // proveriti ovde da li jos nesto fali, tipa aktivacioni token i sl
+
+        clientEditorRestTemplate = restTemplateServiceImpl.setupRestTemplate(clientEditorRestTemplate);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<ClientProfileEditorDto> requestEntity = new HttpEntity<>(clientToUpdate, headers);
+
+        try {
+            ResponseEntity<String> response = ProfileEditorServiceRestTemplate.exchange(
+                    "http://localhost:8080/api/client/update", // Pretpostavljam da je ovo endpoint za ažuriranje
+                    HttpMethod.PUT,
+                    requestEntity,
+                    String.class);
+
+            if (response.getStatusCode() == HttpStatus.OK) {
+                JOptionPane.showMessageDialog(this, "Podaci su uspešno ažurirani.", "Uspeh", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this, "Došlo je do greške prilikom ažuriranja.", "Greška", JOptionPane.ERROR_MESSAGE);
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Greška u komunikaciji sa serverom: " + ex.getMessage(), "Greška", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
 

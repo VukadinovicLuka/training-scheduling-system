@@ -34,6 +34,7 @@ public class ManagerMapper {
         user.setFirstName(managerCreateDto.getFirstName());
         user.setLastName(managerCreateDto.getLastName());
         user.setDateOfBirth(managerCreateDto.getDateOfBirth());
+        user.setRole("ROLE_MANAGER");
 
         Manager manager = new Manager();
         manager.setUser(user);

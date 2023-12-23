@@ -1,15 +1,13 @@
 package nikolalukatrening.GUI2.login;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import lombok.Setter;
-import nikolalukatrening.GUI2.client.ClientCreateDto;
-import nikolalukatrening.GUI2.client.ClientDto;
+import nikolalukatrening.GUI2.dto.ClientCreateDto;
+import nikolalukatrening.GUI2.dto.ClientDto;
 import org.springframework.http.*;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 

@@ -1,11 +1,10 @@
-package nikolalukatrening.GUI2.client;
+package nikolalukatrening.GUI2.dto;
 
 
 // ClientDto bi trebao da sadrži informacije o korisniku koje su sigurne za deljenje preko klijentsko-server komunikacije.
 // ali bez osetljivih informacija kao što su lozinke ili bilo koji drugi privatni podaci.
 
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 // iskljuceno : cardNumber i password

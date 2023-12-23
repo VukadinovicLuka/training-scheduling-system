@@ -1,8 +1,7 @@
-package nikolalukatrening.GUI2.client;
+package nikolalukatrening.GUI2.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter

@@ -3,17 +3,14 @@ package nikolalukatrening.GUI2.login;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.Getter;
 import lombok.Setter;
-import nikolalukatrening.GUI2.client.*;
-import nikolalukatrening.GUI2.clientViews.ProfileEditor;
+import nikolalukatrening.GUI2.dto.*;
 import nikolalukatrening.GUI2.interfaces.AdminInterface;
 import nikolalukatrening.GUI2.interfaces.ClientInterface;
-import org.springframework.context.annotation.Profile;
 import org.springframework.http.*;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.DefaultUriBuilderFactory;
 
 
 import javax.swing.*;
@@ -190,7 +187,7 @@ public class Login extends JFrame {
                             ClientProfileEditorDto.class);
 
                     if (!responseForClient.getBody().getIsActivated()){
-                        JOptionPane.showMessageDialog(this, "Nalog nije aktiviran!", "Greška", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(this, "Nalog nije aktiviran! Idite na gmail da aktivarate nalog", "Greška", JOptionPane.ERROR_MESSAGE);
                         return;
                     }
                      ClientInterface clientInterface = new ClientInterface(userId);

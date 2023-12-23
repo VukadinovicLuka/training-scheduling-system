@@ -122,7 +122,11 @@ public class ClientServiceImpl implements ClientService {
     @Override
     public ClientAdminDto updateClientActivation(ClientAdminDto clientAdminDto) {
         Client client = clientRepository.findByUserUsername(clientAdminDto.getUser().getUsername()).orElseThrow(()->new RuntimeException());
-        client.setIsActivated(true);
+        if (client.getIsActivated() == true){
+            client.setIsActivated(false);
+        }else{
+            client.setIsActivated(true);
+        }
         clientRepository.save(client);
         return clientMapper.clientToClientAdminDto(client);
     }
@@ -137,7 +141,7 @@ public class ClientServiceImpl implements ClientService {
                 "Activation Email",
                 "Pozdrav," + params.get("ime") + " " + params.get("prezime") + ",da biste nastavili verifikaciju idite na link: "
                         + params.get("link") + "\n" + "Uputstvo za verifikaciju: klikom na client/activate/token, izaci ce Vam dugme try it out. Klikente na to" +
-                        "dugme i unesete token koji se nalazi u nastavku." + "\n" + "Token: " + activationToken,
+                        "dugme i unesete token koji se nalazi u nastavku." + "\n" + "Token: " + activationToken ,
                 "ACTIVATION",
                 params
         );

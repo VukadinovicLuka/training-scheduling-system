@@ -1,10 +1,11 @@
 package nikolalukatrening.GUI2.interfaces;
 
-import nikolalukatrening.GUI2.client.ClientProfileEditorDto;
-import nikolalukatrening.GUI2.client.TokenRequestDto;
-import nikolalukatrening.GUI2.client.UserDto;
+import nikolalukatrening.GUI2.dto.ClientProfileEditorDto;
+import nikolalukatrening.GUI2.dto.UserDto;
 import nikolalukatrening.GUI2.customTable.CustomTable;
-import org.springframework.boot.autoconfigure.security.SecurityProperties;
+import nikolalukatrening.GUI2.service.AdminService;
+import nikolalukatrening.GUI2.service.impl.AdminServiceImpl;
+import nikolalukatrening.GUI2.service.impl.RestTemplateServiceImpl;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -20,19 +21,30 @@ import java.util.List;
 
 public class AdminInterface extends JFrame {
 
-    private CardLayout cardLayout = new CardLayout();
-    private JPanel cardPanel = new JPanel(cardLayout);
-    private JToolBar toolBar = new JToolBar();
-    private JPanel clientsPanel = new JPanel(new BorderLayout());
-    private JPanel managersPanel = new JPanel(new BorderLayout());
+    private CardLayout cardLayout;
+    private JPanel cardPanel;
+    private JToolBar toolBar;
+    private JPanel clientsPanel;
+    private JPanel managersPanel;
     private CustomTable clientsTable;
     private JTable managersTable;
-
     private RestTemplate adminServiceRestTemplate;
     private RestTemplate activationServiceRestTemplate;
+    private RestTemplate deActivationServiceRestTemplate;
+    private AdminServiceImpl adminService;
+    private RestTemplateServiceImpl restTemplateService;
 
 
     public AdminInterface() {
+        this.restTemplateService = new RestTemplateServiceImpl();
+        this.adminService = new AdminServiceImpl();
+        this.cardLayout = new CardLayout();
+        this.cardPanel = new JPanel(cardLayout);
+        this.toolBar = new JToolBar();
+        this.clientsPanel = new JPanel(new BorderLayout());
+        this.managersPanel = new JPanel(new BorderLayout());
+
+
         setTitle("Admin Interfejs");
         setSize(800, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -61,23 +73,21 @@ public class AdminInterface extends JFrame {
         toolBar.add(managersButton);
 
         JButton searchButton = new JButton("Zabrani");
-        searchButton.addActionListener(e -> zabrani());
+        deActivationServiceRestTemplate = restTemplateService.setupRestTemplate(deActivationServiceRestTemplate);
+        searchButton.addActionListener(e -> adminService.zabrani(clientsTable, deActivationServiceRestTemplate, this));
         toolBar.add(searchButton);
 
         JButton resetColorButton = new JButton("Odblokiraj");
-        resetColorButton.addActionListener(e -> odblokiraj());
+        activationServiceRestTemplate = restTemplateService.setupRestTemplate(activationServiceRestTemplate);
+        resetColorButton.addActionListener(e -> adminService.odblokiraj(clientsTable, activationServiceRestTemplate, this));
         toolBar.add(resetColorButton);
     }
 
     private void setupClientsPanel() {
-        String[] clientColumns = new String[]{"id", "username", "email", "firstName", "lastName", "dateOfBirth", "reservedTraining", "cardNumber", "isActivated", "password", "activationToken", "role"};
+        String[] clientColumns = new String[]{"id", "username", "email", "firstName", "lastName", "dateOfBirth", "reservedTraining",
+                                              "cardNumber", "isActivated", "password", "activationToken", "role"};
 
-        adminServiceRestTemplate = new RestTemplate();
-        List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
-        MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
-        converter.setSupportedMediaTypes(Collections.singletonList(MediaType.APPLICATION_JSON));
-        messageConverters.add(converter);
-        adminServiceRestTemplate.setMessageConverters(messageConverters);
+        adminServiceRestTemplate = restTemplateService.setupRestTemplate(adminServiceRestTemplate);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -109,9 +119,6 @@ public class AdminInterface extends JFrame {
                     client.getUser().getRole()
             };
             clientsModel.addRow(row);
-//            if (client.getIsActivated() == false) {
-//                highlightedRowsClients.add(clientsModel.getRowCount() - 1);
-//            }
         }
 
         // Set the model to the JTable and add it to the JScrollPane
@@ -130,105 +137,6 @@ public class AdminInterface extends JFrame {
         DefaultTableModel managersModel = new DefaultTableModel(managerData, managerColumns);
         managersTable = new JTable(managersModel);
         managersPanel.add(new JScrollPane(managersTable), BorderLayout.CENTER);
-    }
-
-    private void odblokiraj(){
-        String username = JOptionPane.showInputDialog(this, "Unesite username:");
-        if (username == null) {
-            return;
-        }
-        if (username.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Morate uneti username!");
-            return;
-        }
-
-
-        // izvlacenje reda iz tabele na osnovu username-a
-        int row = -1;
-        for (int i = 0; i < clientsTable.getRowCount(); i++) {
-            if (clientsTable.getValueAt(i, 1).equals(username)) {
-                row = i;
-                break;
-            }
-        }
-        if (row == -1) {
-            JOptionPane.showMessageDialog(this, "Ne postoji korisnik sa unetim username-om!");
-            return;
-        }
-
-        // izvuci mi sve podatke iz tabele na osnovu reda
-        String id = clientsTable.getValueAt(row, 0).toString();
-        String username1 = clientsTable.getValueAt(row, 1).toString();
-        String email = clientsTable.getValueAt(row, 2).toString();
-        String firstName = clientsTable.getValueAt(row, 3).toString();
-        String lastName = clientsTable.getValueAt(row, 4).toString();
-        String dateOfBirth = clientsTable.getValueAt(row, 5).toString();
-        String reservedTraining = clientsTable.getValueAt(row, 6).toString();
-        String cardNumber = clientsTable.getValueAt(row, 7).toString();
-        String isActivated = clientsTable.getValueAt(row, 8).toString();
-        String password = clientsTable.getValueAt(row, 9).toString();
-        String activationToken = clientsTable.getValueAt(row, 10).toString();
-        String role = clientsTable.getValueAt(row, 11).toString();
-
-        UserDto user = new UserDto();
-        user.setUsername(username1);
-        user.setEmail(email);
-        user.setFirstName(firstName);
-        user.setLastName(lastName);
-        user.setDateOfBirth(dateOfBirth);
-        user.setPassword(password);
-        user.setRole(role);
-
-
-        // napravi objekat od tih podataka
-        ClientProfileEditorDto client = new ClientProfileEditorDto();
-        client.setId(Long.parseLong(id));
-        client.setReservedTraining(Integer.valueOf(reservedTraining));
-        client.setCardNumber(Integer.valueOf(cardNumber));
-        client.setIsActivated(Boolean.valueOf(isActivated));
-        client.setActivationToken(activationToken);
-        client.setUser(user);
-
-
-
-
-
-
-
-        activationServiceRestTemplate = new RestTemplate();
-        List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
-        MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
-        converter.setSupportedMediaTypes(Collections.singletonList(MediaType.APPLICATION_JSON));
-        messageConverters.add(converter);
-        activationServiceRestTemplate.setMessageConverters(messageConverters);
-
-
-        // Kreirajte header-e za zahtev
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        RequestEntity<ClientProfileEditorDto> requestEntity = RequestEntity.put(URI.create("http://localhost:8080/api/client/activationUpdate")).headers(headers).body(client);
-
-
-        // Posaljite zahtev
-        ResponseEntity<ClientProfileEditorDto> responseEntity = activationServiceRestTemplate.exchange(requestEntity, ClientProfileEditorDto.class);
-        Boolean isActivated1 = responseEntity.getBody().getIsActivated(); // ovo je true
-
-        // hocu da isActivated u tabeli bude vrednost isActivated1
-        clientsTable.setValueAt(isActivated1, row, 8);
-        // refreshujem tabelu
-        clientsTable.repaint();
-    }
-
-    private void zabrani(){
-        String username = JOptionPane.showInputDialog(this, "Unesite username:");
-        if (username == null) {
-            return;
-        }
-        if (username.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Morate uneti username!");
-            return;
-        }
-
     }
 
 }

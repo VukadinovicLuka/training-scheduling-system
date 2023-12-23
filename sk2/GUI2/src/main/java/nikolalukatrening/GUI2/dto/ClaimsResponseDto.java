@@ -1,4 +1,4 @@
-package nikolalukatrening.GUI2.client;
+package nikolalukatrening.GUI2.dto;
 
 
 
