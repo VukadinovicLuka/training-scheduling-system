@@ -164,6 +164,7 @@ public class ClientServiceImpl implements ClientService {
         Map<String, String> params = new HashMap<>();
         params.put("ime", clientDto.getFirstName());
         params.put("prezime", clientDto.getLastName());
+        params.put("clientId", clientDto.getId().toString());
         params.put("link", "http://localhost:8080/api/swagger-ui/index.html");
         EmailMessageDto emailMessage = new EmailMessageDto(
                 clientDto.getEmail(),
@@ -182,6 +183,7 @@ public class ClientServiceImpl implements ClientService {
         params.put("ime", clientAdminDto.getUser().getFirstName());
         params.put("prezime", clientAdminDto.getUser().getLastName());
         params.put("password", clientAdminDto.getUser().getPassword());
+        params.put("clientId", clientAdminDto.getId().toString());
         EmailMessageDto emailMessage = new EmailMessageDto(
                 clientAdminDto.getUser().getEmail(),
                 "New password Email",

@@ -1,4 +1,6 @@
 package nikolalukatrening.Notifikacioni_servis.service.impl;
 
-public class NotificationServiceImpl {
+import nikolalukatrening.Notifikacioni_servis.service.NotificationService;
+
+public class NotificationServiceImpl implements NotificationService {
 }

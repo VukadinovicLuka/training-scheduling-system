@@ -21,6 +21,7 @@ public class NotificationType {
     private String link;
     private String receiver;
     private String password;
+    private Long clientId;
 
     // Konstruktori, getteri i setteri
 }

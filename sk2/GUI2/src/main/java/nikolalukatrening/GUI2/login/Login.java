@@ -186,6 +186,10 @@ public class Login extends JFrame {
                             entity,
                             ClientProfileEditorDto.class);
 
+                    if (!responseForClient.getBody().getUser().getPassword().equals(String.valueOf(jPasswordField1.getPassword()))){
+                        JOptionPane.showMessageDialog(this, "Pogrešna lozinka!", "Greška", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
                     if (!responseForClient.getBody().getIsActivated()){
                         JOptionPane.showMessageDialog(this, "Nalog nije aktiviran! Idite na gmail da aktivarate nalog", "Greška", JOptionPane.ERROR_MESSAGE);
                         return;

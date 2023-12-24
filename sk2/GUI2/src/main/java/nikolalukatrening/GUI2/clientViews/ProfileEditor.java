@@ -104,12 +104,8 @@ public class ProfileEditor extends JPanel {
 
     public void loadProfileData(Integer id) {
         this.id = id;
-        ProfileEditorServiceRestTemplate = new RestTemplate();
-        List<HttpMessageConverter<?>> messageConverters = new ArrayList<>();
-        MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
-        converter.setSupportedMediaTypes(Collections.singletonList(MediaType.APPLICATION_JSON));
-        messageConverters.add(converter);
-        ProfileEditorServiceRestTemplate.setMessageConverters(messageConverters);
+
+        ProfileEditorServiceRestTemplate = restTemplateServiceImpl.setupRestTemplate(ProfileEditorServiceRestTemplate);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
