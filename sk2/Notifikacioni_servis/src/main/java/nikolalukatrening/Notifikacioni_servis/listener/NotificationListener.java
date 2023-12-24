@@ -33,9 +33,10 @@ public class NotificationListener {
         NotificationType notificationType = new NotificationType();
         notificationType.setType(emailMessage.getType());
         notificationType.setReceiver(emailMessage.getTo());
-        notificationType.setLink(emailMessage.getParams().get("link"));
+        if (emailMessage.getParams().get("link") != null) notificationType.setLink(emailMessage.getParams().get("link"));
         notificationType.setFirstName(emailMessage.getParams().get("ime"));
         notificationType.setLastName(emailMessage.getParams().get("prezime"));
+        if (emailMessage.getParams().get("password") != null) notificationType.setPassword(emailMessage.getParams().get("password"));
         emailMessageRepository.save(notificationType);
 
         // treba emailMessage dodati u h2 bazu za notifikacije

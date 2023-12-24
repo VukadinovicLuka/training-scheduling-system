@@ -25,14 +25,14 @@ public class ProfileEditor extends JPanel {
     private JTextField usernameField;
     private JTextField lastNameField;
     private JTextField firstNameField;
-    private JTextField passwordField;
+    private JPasswordField passwordField;
     private JTextField dateOfBirthField;
     private JTextField cardNumberField;
     private JTextField reservedTrainingsField;
     private JTextField emailField;
     private RestTemplate ProfileEditorServiceRestTemplate;
     private RestTemplate clientEditorRestTemplate;
-
+    private RestTemplate updatePasswordClientRestTemplate;
     private RestTemplateServiceImpl restTemplateServiceImpl;
     private Integer id;
     private ClientProfileEditorDto client;
@@ -41,7 +41,8 @@ public class ProfileEditor extends JPanel {
         usernameField = new JTextField(15);
         lastNameField = new JTextField(15);
         firstNameField = new JTextField(15);
-        passwordField = new JTextField(15);
+        passwordField = new JPasswordField(15);
+        passwordField.setEchoChar('*');
         dateOfBirthField = new JTextField(15);
         cardNumberField = new JTextField(15);
         reservedTrainingsField = new JTextField(15);
@@ -65,6 +66,12 @@ public class ProfileEditor extends JPanel {
         addLabelAndTextField("Prezime:", 2, lastNameField);
         addLabelAndTextField("Ime:", 3, firstNameField);
         addLabelAndTextField("Lozinka:", 4, passwordField);
+        JButton changePasswordButton = new JButton("Promeni lozinku");
+        changePasswordButton.addActionListener(e -> changePassword()); // Metod za promenu lozinke
+        gbc.gridx = 2; // Postavite dugme pored polja za tekst lozinke
+        gbc.gridy = 4;
+        gbc.anchor = GridBagConstraints.LINE_START;
+        add(changePasswordButton, gbc);
         addLabelAndTextField("Datum rodjenja:", 5,dateOfBirthField);
         addLabelAndTextField("Broj kartice:", 6, cardNumberField);
         addLabelAndTextField("Rezervisani treninzi:", 7,(reservedTrainingsField));
@@ -74,6 +81,8 @@ public class ProfileEditor extends JPanel {
         cardNumberField.setEnabled(false);
         reservedTrainingsField.setEditable(false);
         reservedTrainingsField.setEnabled(false);
+        passwordField.setEnabled(false);
+        passwordField.setEditable(false);
 
         // Dugme za potvrdu izmena
         JButton btnConfirm = new JButton("Potvrdi izmene");
@@ -161,8 +170,6 @@ public class ProfileEditor extends JPanel {
         clientToUpdate.setActivationToken(client.getActivationToken());
         clientToUpdate.setIsActivated(client.getIsActivated());
 
-        // proveriti ovde da li jos nesto fali, tipa aktivacioni token i sl
-        System.out.println("Klijent koji se salje na server: " + clientToUpdate.toString());
         clientEditorRestTemplate = restTemplateServiceImpl.setupRestTemplate(clientEditorRestTemplate);
 
         HttpHeaders headers = new HttpHeaders();
@@ -184,6 +191,89 @@ public class ProfileEditor extends JPanel {
         }
 
     }
+
+
+    private void changePassword() {
+        // Prvo tražimo trenutnu lozinku od korisnika
+        JPasswordField currentPasswordField = new JPasswordField();
+        int action = JOptionPane.showConfirmDialog(this, currentPasswordField, "Unesite trenutnu lozinku:", JOptionPane.OK_CANCEL_OPTION);
+        if (action == JOptionPane.OK_OPTION) {
+            String currentPassword = new String(currentPasswordField.getPassword());
+            // ovde bi valjalo da dodate logiku za proveru da li je uneta trenutna lozinka tačna
+            boolean isCurrentPasswordCorrect = checkPassword(currentPassword);
+            if (isCurrentPasswordCorrect) {
+                // Trenutna lozinka je tačna, sada tražimo novu lozinku
+                JPasswordField newPasswordField = new JPasswordField();
+                int newPasswordAction = JOptionPane.showConfirmDialog(this, newPasswordField, "Unesite novu lozinku:", JOptionPane.OK_CANCEL_OPTION);
+                if (newPasswordAction == JOptionPane.OK_OPTION) {
+                    String newPassword = new String(newPasswordField.getPassword());
+                    if (!newPassword.isEmpty()) {
+                        // ovde logika za postavljanje nove lozinke
+                        updatePassword(newPassword);
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Nova lozinka ne može biti prazna.", "Greška", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            } else {
+                JOptionPane.showMessageDialog(this, "Trenutna lozinka nije tačna.", "Greška", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    private boolean checkPassword(String password) {
+
+        if (client.getUser().getPassword().equals(password)){ // uporedjujemo lozinku ulogovanog klijenta sa unetim current passwordom
+            return true;
+        }
+        return false;
+    }
+
+    private void updatePassword(String newPassword) {
+        // Ovde implementirajte logiku za ažuriranje lozinke
+        // Na primer, ažuriranje lozinke u bazi podataka ili poslati zahtev na server da promeni lozinku
+
+        // Prvo kreiramo objekat koji sadrži novu lozinku
+        UserDto userDto = new UserDto();
+        userDto.setPassword(newPassword);
+        userDto.setUsername(client.getUser().getUsername());
+        userDto.setEmail(client.getUser().getEmail());
+        userDto.setFirstName(client.getUser().getFirstName());
+        userDto.setLastName(client.getUser().getLastName());
+        userDto.setDateOfBirth(client.getUser().getDateOfBirth());
+        userDto.setRole(client.getUser().getRole());
+        ClientProfileEditorDto clientToUpdate = new ClientProfileEditorDto();
+        clientToUpdate.setUser(userDto);
+        clientToUpdate.setCardNumber(client.getCardNumber());
+        clientToUpdate.setReservedTraining(client.getReservedTraining());
+        clientToUpdate.setId(Long.valueOf(id));
+        clientToUpdate.setActivationToken(client.getActivationToken());
+        clientToUpdate.setIsActivated(client.getIsActivated());
+
+        // Proverite da li je objekat kreiran
+        System.out.println("Klijent koji se salje na server: " + clientToUpdate.toString());
+
+        // Postavite RestTemplate
+        updatePasswordClientRestTemplate = restTemplateServiceImpl.setupRestTemplate(updatePasswordClientRestTemplate);
+
+        // Postavite hedere
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        RequestEntity<ClientProfileEditorDto> requestEntity = RequestEntity.put(URI.create("http://localhost:8080/api/client/" + id)).headers(headers).body(clientToUpdate);
+
+
+        // Posaljite zahtev
+        ResponseEntity<ClientProfileEditorDto> responseEntity = updatePasswordClientRestTemplate.exchange(requestEntity, ClientProfileEditorDto.class);
+
+        // Proverite odgovor servera
+        if (responseEntity.getStatusCode() == HttpStatus.OK) {
+            JOptionPane.showMessageDialog(null, "Uspesno ste promenili lozinku! Za prikaz lozinke idite na gmail nalog.");
+            loadProfileData(id); // id korisnika je dobar
+
+        } else {
+            JOptionPane.showMessageDialog(null, "Doslo je do greske pri promeni lozinke!");
+        }
+    }
+
 
 
     public void setUsernameField(String username) {

@@ -20,6 +20,7 @@ public class NotificationType {
     private String lastName;
     private String link;
     private String receiver;
+    private String password;
 
     // Konstruktori, getteri i setteri
 }

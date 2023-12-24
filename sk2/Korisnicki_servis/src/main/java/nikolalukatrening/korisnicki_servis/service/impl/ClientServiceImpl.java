@@ -136,7 +136,15 @@ public class ClientServiceImpl implements ClientService {
         //  clientRepository.findById(id)
         Client client = clientRepository.findById(id).orElseThrow(()->new RuntimeException());
         client.getUser().setUsername(clientAdminDto.getUser().getUsername());
-        client.getUser().setPassword(clientAdminDto.getUser().getPassword());
+
+        // ukoliko je stara sifra ista kao i nova, ne menjaj je, ukoliko je razlicita onda salji mail
+        if (client.getUser().getPassword().equals(clientAdminDto.getUser().getPassword())) {
+            client.getUser().setPassword(clientAdminDto.getUser().getPassword());
+        }else{
+            client.getUser().setPassword(clientAdminDto.getUser().getPassword());
+            createPasswordEmailMessageDto(clientAdminDto);
+        }
+
         client.getUser().setRole(clientAdminDto.getUser().getRole());
         client.getUser().setFirstName(clientAdminDto.getUser().getFirstName());
         client.getUser().setLastName(clientAdminDto.getUser().getLastName());
@@ -164,6 +172,22 @@ public class ClientServiceImpl implements ClientService {
                         + params.get("link") + "\n" + "Uputstvo za verifikaciju: klikom na client/activate/token, izaci ce Vam dugme try it out. Klikente na to" +
                         "dugme i unesete token koji se nalazi u nastavku." + "\n" + "Token: " + activationToken ,
                 "ACTIVATION",
+                params
+        );
+        jmsTemplate.convertAndSend(activationDestination, messageHelper.createTextMessage(emailMessage));
+    }
+
+    private void createPasswordEmailMessageDto(ClientAdminDto clientAdminDto) {
+        Map<String, String> params = new HashMap<>();
+        params.put("ime", clientAdminDto.getUser().getFirstName());
+        params.put("prezime", clientAdminDto.getUser().getLastName());
+        params.put("password", clientAdminDto.getUser().getPassword());
+        EmailMessageDto emailMessage = new EmailMessageDto(
+                clientAdminDto.getUser().getEmail(),
+                "New password Email",
+                "Pozdrav," + params.get("ime") + " " + params.get("prezime") + ",vasa nova lozinka je: " + "\n"
+                        + params.get("password"),
+                "PASSWORD",
                 params
         );
         jmsTemplate.convertAndSend(activationDestination, messageHelper.createTextMessage(emailMessage));
