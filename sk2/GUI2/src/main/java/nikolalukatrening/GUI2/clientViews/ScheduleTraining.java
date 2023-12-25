@@ -10,16 +10,26 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.util.Date;
+import java.util.Properties;
+
+import nikolalukatrening.GUI2.customTable.DateLabelFormatter;
+import org.jdatepicker.JDatePicker;
+import org.jdatepicker.impl.JDatePanelImpl;
+import org.jdatepicker.impl.JDatePickerImpl;
+import org.jdatepicker.impl.UtilDateModel;
+
 
 @Getter
 @Setter
     public class ScheduleTraining extends JPanel {
         private JLabel lblTrainingType, lblDayOfWeek, lblTrainingOptions, lblTime;
-        private JComboBox<String> cbTrainingType, cbDayOfWeek, cbTrainingOptions, cbTime;
+        private JComboBox<String> cbTrainingType, cbTrainingOptions, cbTime;
         private JButton btnBook;
         private Font labelFont = new Font("Arial", Font.BOLD, 16);
         private Font comboFont = new Font("Arial", Font.PLAIN, 16);
         private Font buttonFont = new Font("Arial", Font.BOLD, 16);
+        private JDatePicker datePicker;
         private GroupTraining groupTrainingReference;
         public ScheduleTraining(GroupTraining groupTrainingReference) {
             this.groupTrainingReference = groupTrainingReference;
@@ -40,8 +50,15 @@ import java.awt.event.ItemListener;
 
             lblTrainingType = createLabel("Odaberite vrstu treninga:");
             cbTrainingType = createComboBox(new String[]{"Individualno", "Grupno"});
-            lblDayOfWeek = createLabel("Odaberite dan u nedelji:");
-            cbDayOfWeek = createComboBox(new String[]{"Ponedeljak", "Utorak", "Sreda", "Četvrtak", "Petak", "Subota", "Nedelja"});
+            lblDayOfWeek = createLabel("Odaberite datum:");
+            UtilDateModel model = new UtilDateModel();
+            Properties p = new Properties();
+            p.put("text.today", "Today");
+            p.put("text.month", "Month");
+            p.put("text.year", "Year");
+            JDatePanelImpl datePanel = new JDatePanelImpl(model, p);
+            datePicker = new JDatePickerImpl(datePanel, new DateLabelFormatter());
+//            cbDayOfWeek = createComboBox(new String[]{"Ponedeljak", "Utorak", "Sreda", "Četvrtak", "Petak", "Subota", "Nedelja"});
             lblTrainingOptions = createLabel("Tip treninga:");
             cbTrainingOptions = createComboBox(new String[]{}); // Opcije će biti dodate dinamički
             lblTime = createLabel("Vreme:");
@@ -63,7 +80,7 @@ import java.awt.event.ItemListener;
             gbc.gridy = 2;
             add(lblDayOfWeek, gbc);
             gbc.gridx = 1;
-            add(cbDayOfWeek, gbc);
+            add((Component) datePicker, gbc);
 
             // Tip treninga
             gbc.gridx = 0;
@@ -144,13 +161,14 @@ import java.awt.event.ItemListener;
     private void bookTraining() {
         // Prikupljanje informacija iz ComboBox-ova i TextField-ova
         String trainingType = cbTrainingType.getSelectedItem().toString();
-        String day = cbDayOfWeek.getSelectedItem().toString();
+        Date selectedDate = (Date) datePicker.getModel().getValue();
+        System.out.println("selected DAte: " + selectedDate);
         String trainingOption = cbTrainingOptions.getSelectedItem().toString();
         String time = cbTime.getSelectedItem().toString();
         int numberOfMembers = trainingType.equals("Individualno") ? 1 : (int) (Math.random() * 12 + 1);
 
         // Dodavanje reda u GroupTraining tabelu
-        groupTrainingReference.addTrainingRow(trainingType, day, trainingOption, time, numberOfMembers);
+//        groupTrainingReference.addTrainingRow(trainingType, day, trainingOption, time, numberOfMembers);
     }
         private void styleComponents() {
             setBackground(Color.WHITE); // Postavite boju pozadine panela na belo
@@ -162,7 +180,7 @@ import java.awt.event.ItemListener;
             lblTime.setFont(new Font("Arial", Font.BOLD, 16));
 
             cbTrainingType.setFont(new Font("Arial", Font.PLAIN, 14));
-            cbDayOfWeek.setFont(new Font("Arial", Font.PLAIN, 14));
+//            cbDayOfWeek.setFont(new Font("Arial", Font.PLAIN, 14));
             cbTrainingOptions.setFont(new Font("Arial", Font.PLAIN, 14));
             cbTime.setFont(new Font("Arial", Font.PLAIN, 14));
 

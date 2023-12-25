@@ -43,7 +43,7 @@ public class ClientNotifications extends JPanel {
 
     }
 
-
+// TODO: kada se promeni lozinka, ne radi refresh tabele
 
     public void loadNotifications(Integer id){
         // id je id ulogovanog korisnika
