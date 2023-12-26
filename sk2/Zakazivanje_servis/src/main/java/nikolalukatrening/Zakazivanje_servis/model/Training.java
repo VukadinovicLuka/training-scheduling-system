@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @Entity
@@ -16,7 +17,7 @@ public class Training {
     private Long id;
 
     private String startTime;
-    private Date date;
+    private LocalDate date;
     private String trainingType;
     private Boolean isGroupTraining;
     private Integer maxParticipants;

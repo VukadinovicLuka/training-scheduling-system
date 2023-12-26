@@ -1,28 +1,32 @@
 package nikolalukatrening.GUI2.clientViews;
 
-
 import lombok.Getter;
 import lombok.Setter;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.util.Date;
-import java.util.Properties;
-
+import java.net.URI;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.*;
+import java.util.List;
 import nikolalukatrening.GUI2.customTable.DateLabelFormatter;
+import nikolalukatrening.GUI2.dto.TrainingDto;
+import nikolalukatrening.GUI2.service.impl.RestTemplateServiceImpl;
 import org.jdatepicker.JDatePicker;
 import org.jdatepicker.impl.JDatePanelImpl;
 import org.jdatepicker.impl.JDatePickerImpl;
 import org.jdatepicker.impl.UtilDateModel;
-
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.*;
+import org.springframework.web.client.RestTemplate;
 
 @Getter
 @Setter
-    public class ScheduleTraining extends JPanel {
+public class ScheduleTraining extends JPanel {
         private JLabel lblTrainingType, lblDayOfWeek, lblTrainingOptions, lblTime;
         private JComboBox<String> cbTrainingType, cbTrainingOptions, cbTime;
         private JButton btnBook;
@@ -31,7 +35,13 @@ import org.jdatepicker.impl.UtilDateModel;
         private Font buttonFont = new Font("Arial", Font.BOLD, 16);
         private JDatePicker datePicker;
         private GroupTraining groupTrainingReference;
+        private RestTemplate timeRestTemplate;
+        private RestTemplateServiceImpl restTemplateServiceImpl;
+        private RestTemplate createTrainingTemplate;
+
+        List<String> timeSlots = new ArrayList<>();
         public ScheduleTraining(GroupTraining groupTrainingReference) {
+            this.restTemplateServiceImpl = new RestTemplateServiceImpl();
             this.groupTrainingReference = groupTrainingReference;
             setLayout(new GridBagLayout());
             GridBagConstraints gbc = new GridBagConstraints();
@@ -58,12 +68,29 @@ import org.jdatepicker.impl.UtilDateModel;
             p.put("text.year", "Year");
             JDatePanelImpl datePanel = new JDatePanelImpl(model, p);
             datePicker = new JDatePickerImpl(datePanel, new DateLabelFormatter());
+            datePicker.addActionListener(e -> {
+                Date selectedDate = (Date) datePicker.getModel().getValue();
+                if (selectedDate != null) {
+                    // Convert Date to LocalDate or the format required by your backend
+                    LocalDate localDate = selectedDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                    // Now fetch the unavailable times for this date
+                    fetchUnavailableTimes(localDate);
+                }
+            });
 //            cbDayOfWeek = createComboBox(new String[]{"Ponedeljak", "Utorak", "Sreda", "Četvrtak", "Petak", "Subota", "Nedelja"});
             lblTrainingOptions = createLabel("Tip treninga:");
             cbTrainingOptions = createComboBox(new String[]{}); // Opcije će biti dodate dinamički
             lblTime = createLabel("Vreme:");
-            cbTime = createComboBox(new String[]{"08:00", "09:00", "10:00", "11:00"});
+
+            for (int hour = 8; hour < 24; hour++) {
+                String start = String.format("%02d:00", hour);
+                String end = String.format("%02d:00", (hour + 1) % 24);
+                timeSlots.add(start + "-" + end);
+            }
+
+            cbTime = createComboBox(timeSlots.toArray(new String[0]));
             btnBook = createButton("Zakaži");
+            btnBook.addActionListener(e-> zakazivanje());
 
             // Postavljanje komponenti na panelu koristeći GridBagLayout
             gbc.gridwidth = 1;
@@ -113,11 +140,74 @@ import org.jdatepicker.impl.UtilDateModel;
                     }
                 }
             });
-
             // Initialize options
             updateTrainingOptions();
             styleComponents();
         }
+
+    private void zakazivanje() {
+        if (cbTrainingType.getSelectedItem() == null || datePicker.getModel().getValue() == null || cbTrainingOptions.getSelectedItem() == null || cbTime.getSelectedItem() == null) {
+            JOptionPane.showMessageDialog(null, "Morate odabrati sve podatke!");
+        }
+
+        TrainingDto trainingDto = new TrainingDto();
+        trainingDto.setTrainingType((String) cbTrainingOptions.getSelectedItem());
+        if (cbTrainingType.getSelectedItem().equals("Grupno")){
+            System.out.println("usao");
+            trainingDto.setIsGroupTraining(true);
+            trainingDto.setMaxParticipants(12);
+        }
+        if(cbTrainingType.getSelectedItem().equals("Individualno")) {
+            trainingDto.setIsGroupTraining(false);
+            trainingDto.setMaxParticipants(1);
+        }
+        Date date = (Date) datePicker.getModel().getValue();
+
+        // Convert Date to LocalDate
+        LocalDate localDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+
+        // Now you can use localDate in your DTO
+        trainingDto.setDate(localDate);
+        trainingDto.setGymId(null);
+
+        String time = (String) cbTime.getSelectedItem();
+        String[] prvo = time.split("-");
+
+        trainingDto.setStartTime(prvo[0]);
+
+        createTrainingTemplate = restTemplateServiceImpl.setupRestTemplate(createTrainingTemplate);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        RequestEntity<TrainingDto> requestEntity = RequestEntity.post(URI.create("http://localhost:8082/api/training/createTraining")).headers(headers).body(trainingDto);
+        ResponseEntity<TrainingDto> responseEntity = createTrainingTemplate.exchange(requestEntity, TrainingDto.class);
+        fetchUnavailableTimes(localDate);
+
+    }
+    private void fetchUnavailableTimes(LocalDate date) {
+        // This is just an example, you need to replace it with your actual REST call logic
+        String url = "http://localhost:8082/api/training/start-times?date=" + date;
+        // Assuming you have a RestTemplate instance named restTemplate
+        timeRestTemplate = restTemplateServiceImpl.setupRestTemplate(timeRestTemplate);
+        ResponseEntity<List<String>> response = timeRestTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<List<String>>() {});
+
+        List<String> unavailableTimes = response.getBody();
+
+        // Now update the ComboBox
+        updateComboBox(unavailableTimes);
+    }
+
+    private void updateComboBox(List<String> unavailableTimes) {
+        // First, clear the ComboBox
+        cbTime.removeAllItems();
+        // Add all times, but skip the ones that are unavailable
+        for (String timeSlot : timeSlots) {
+            String[] part = timeSlot.split("-");
+            if (!unavailableTimes.contains(part[0].trim())) {
+                cbTime.addItem(timeSlot);
+            }
+        }
+    }
 
         private void updateTrainingOptions() {
             cbTrainingOptions.removeAllItems();
@@ -162,7 +252,6 @@ import org.jdatepicker.impl.UtilDateModel;
         // Prikupljanje informacija iz ComboBox-ova i TextField-ova
         String trainingType = cbTrainingType.getSelectedItem().toString();
         Date selectedDate = (Date) datePicker.getModel().getValue();
-        System.out.println("selected DAte: " + selectedDate);
         String trainingOption = cbTrainingOptions.getSelectedItem().toString();
         String time = cbTime.getSelectedItem().toString();
         int numberOfMembers = trainingType.equals("Individualno") ? 1 : (int) (Math.random() * 12 + 1);
@@ -188,8 +277,7 @@ import org.jdatepicker.impl.UtilDateModel;
             btnBook.setBackground(new Color(0, 123, 255));
             btnBook.setForeground(Color.WHITE);
         }
-
-    }
+}
 
 
 

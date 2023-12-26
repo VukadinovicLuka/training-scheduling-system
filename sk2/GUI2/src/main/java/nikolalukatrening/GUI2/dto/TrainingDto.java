@@ -1,11 +1,15 @@
-package nikolalukatrening.Zakazivanje_servis.dto;
+package nikolalukatrening.GUI2.dto;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.Date;
+
 @Getter
 @Setter
+@NoArgsConstructor
 public class TrainingDto {
 
     private LocalDate date;
