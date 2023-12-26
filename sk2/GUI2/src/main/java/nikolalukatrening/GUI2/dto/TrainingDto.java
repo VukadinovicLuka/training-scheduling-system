@@ -18,5 +18,7 @@ public class TrainingDto {
     private String startTime;
     private String trainingType;
     private Integer gymId;
+    private Integer userId;
+
 
 }

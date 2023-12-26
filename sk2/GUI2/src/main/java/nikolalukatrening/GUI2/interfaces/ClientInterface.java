@@ -31,7 +31,7 @@ public class ClientInterface extends JFrame {
 
         // Initialize other views
         GroupTraining groupTrainingView = new GroupTraining();
-        ScheduleTraining scheduleTrainingView = new ScheduleTraining(groupTrainingView);
+        ScheduleTraining scheduleTrainingView = new ScheduleTraining(groupTrainingView, this.userId);
         RateCoachOrGym rateCoachOrGymView = new RateCoachOrGym();
 //        ClientNotifications clientNotificationsView = new ClientNotifications();
 

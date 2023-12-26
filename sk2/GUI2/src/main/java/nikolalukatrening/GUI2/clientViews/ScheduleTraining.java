@@ -14,6 +14,7 @@ import java.time.ZoneId;
 import java.util.*;
 import java.util.List;
 import nikolalukatrening.GUI2.customTable.DateLabelFormatter;
+import nikolalukatrening.GUI2.dto.ClientProfileEditorDto;
 import nikolalukatrening.GUI2.dto.TrainingDto;
 import nikolalukatrening.GUI2.service.impl.RestTemplateServiceImpl;
 import org.jdatepicker.JDatePicker;
@@ -38,9 +39,12 @@ public class ScheduleTraining extends JPanel {
         private RestTemplate timeRestTemplate;
         private RestTemplateServiceImpl restTemplateServiceImpl;
         private RestTemplate createTrainingTemplate;
+        private Integer userId;
+        private ClientProfileEditorDto client;
 
         List<String> timeSlots = new ArrayList<>();
-        public ScheduleTraining(GroupTraining groupTrainingReference) {
+        public ScheduleTraining(GroupTraining groupTrainingReference, Integer userId) {
+            this.userId = userId;
             this.restTemplateServiceImpl = new RestTemplateServiceImpl();
             this.groupTrainingReference = groupTrainingReference;
             setLayout(new GridBagLayout());
@@ -167,8 +171,14 @@ public class ScheduleTraining extends JPanel {
         LocalDate localDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
 
         // Now you can use localDate in your DTO
+
         trainingDto.setDate(localDate);
         trainingDto.setGymId(null);
+
+
+
+
+        trainingDto.setUserId(userId);
 
         String time = (String) cbTime.getSelectedItem();
         String[] prvo = time.split("-");
@@ -182,7 +192,7 @@ public class ScheduleTraining extends JPanel {
         RequestEntity<TrainingDto> requestEntity = RequestEntity.post(URI.create("http://localhost:8082/api/training/createTraining")).headers(headers).body(trainingDto);
         ResponseEntity<TrainingDto> responseEntity = createTrainingTemplate.exchange(requestEntity, TrainingDto.class);
         fetchUnavailableTimes(localDate);
-
+        // treba poslati mail :
     }
     private void fetchUnavailableTimes(LocalDate date) {
         // This is just an example, you need to replace it with your actual REST call logic
