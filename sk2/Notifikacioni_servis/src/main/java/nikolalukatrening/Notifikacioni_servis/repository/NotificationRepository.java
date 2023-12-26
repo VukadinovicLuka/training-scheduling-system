@@ -9,4 +9,6 @@ import java.util.List;
 @Repository
 public interface NotificationRepository extends JpaRepository<NotificationType,Long> {
     List<NotificationType> findByClientId(Long clientId);
+    List<NotificationType> findByType(String type);
+    List<NotificationType> findByReceiver(String receiver);
 }
