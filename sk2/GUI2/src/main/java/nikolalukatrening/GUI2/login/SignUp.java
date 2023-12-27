@@ -29,6 +29,7 @@ public class SignUp extends JFrame {
     private JPasswordField jPasswordField1;
     private JTextField jTextField1, jTextField2,jTextField3,jTextField4,jTextField5 ;
     private RestTemplate SignUpServiceRestTemplate;
+    private static  int i = 1;
     public SignUp() {
         initComponents();
 
@@ -159,7 +160,7 @@ public class SignUp extends JFrame {
         String lastname = jTextField2.getText();
 
         // Kreirajte DTO objekat
-        ClientCreateDto clientCreateDto = new ClientCreateDto(username, password, email, dateOfBirth, name, lastname, 1,1);
+        ClientCreateDto clientCreateDto = new ClientCreateDto(username, password, email, dateOfBirth, name, lastname, i++,0);
 //        ObjectMapper objectMapper = new ObjectMapper();
 //        String jsonPayload = objectMapper.writeValueAsString(clientCreateDto);
 //        System.out.println("JSON Payload: " + jsonPayload);
