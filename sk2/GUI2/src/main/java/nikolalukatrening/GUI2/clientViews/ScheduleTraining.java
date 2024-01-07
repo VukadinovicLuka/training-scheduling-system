@@ -225,6 +225,10 @@ public class ScheduleTraining extends JPanel {
         profileEditor = new ProfileEditor();
         profileEditor.loadProfileData(userId);
     }
+
+
+
+
     private void fetchUnavailableTimes(LocalDate date) {
         // This is just an example, you need to replace it with your actual REST call logic
         String url = "http://localhost:8082/api/training/start-times?date=" + date;

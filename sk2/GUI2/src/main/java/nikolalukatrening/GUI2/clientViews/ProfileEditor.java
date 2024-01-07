@@ -103,6 +103,7 @@ public class ProfileEditor extends JPanel {
 
 
     public void loadProfileData(Integer id) {
+        System.out.println("usao");
         this.id = id;
 
         ProfileEditorServiceRestTemplate = restTemplateServiceImpl.setupRestTemplate(ProfileEditorServiceRestTemplate);

@@ -68,7 +68,7 @@ public class ClientInterface extends JFrame {
     }
 
     private void toolbarButtonClicked(ActionEvent e) {
-        if ("profile".equals(e.getActionCommand()) && profileEditorView == null) {
+        if ("profile".equals(e.getActionCommand())) {
             profileEditorView = new ProfileEditor(); // Create the ProfileEditor instance
             profileEditorView.loadProfileData(this.userId); // Load the data for the logged-in user
             cardPanel.add(profileEditorView, "profile"); // Add ProfileEditor to the card panel
