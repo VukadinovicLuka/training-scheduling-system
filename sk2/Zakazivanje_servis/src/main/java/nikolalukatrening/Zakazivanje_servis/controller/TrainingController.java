@@ -26,6 +26,11 @@ public class TrainingController {
         this.trainingRepository = trainingRepository;
     }
 
+    @GetMapping("/all")
+    public ResponseEntity<List<Training>> getAllTrainings() {
+        return ResponseEntity.ok(trainingRepository.findAll());
+    }
+
     @GetMapping("/start-times")
     public ResponseEntity<List<String>> getStartTimesByDate(@RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         System.out.println(date);

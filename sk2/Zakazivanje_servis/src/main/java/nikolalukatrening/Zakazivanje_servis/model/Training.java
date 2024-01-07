@@ -21,6 +21,7 @@ public class Training {
     private String trainingType;
     private Boolean isGroupTraining;
     private Integer maxParticipants;
+    private Integer userId;
 
     // Dodajte ostale potrebne atribute
 

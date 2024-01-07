@@ -15,6 +15,7 @@ public class TrainingMapper {
         training.setStartTime(trainingDto.getStartTime());
         training.setGym(null);
         training.setMaxParticipants(trainingDto.getMaxParticipants());
+        training.setUserId(trainingDto.getUserId());
         return training;
     }
 
