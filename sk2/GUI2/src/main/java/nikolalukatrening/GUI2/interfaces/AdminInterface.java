@@ -81,6 +81,11 @@ public class AdminInterface extends JFrame {
         activationServiceRestTemplate = restTemplateService.setupRestTemplate(activationServiceRestTemplate);
         resetColorButton.addActionListener(e -> adminService.odblokiraj(clientsTable, activationServiceRestTemplate, this));
         toolBar.add(resetColorButton);
+
+        JButton notificationsButton = new JButton("Notifikacije");
+        activationServiceRestTemplate = restTemplateService.setupRestTemplate(activationServiceRestTemplate);
+        resetColorButton.addActionListener(e -> adminService.odblokiraj(clientsTable, activationServiceRestTemplate, this));
+        toolBar.add(resetColorButton);
     }
 
     private void setupClientsPanel() {
