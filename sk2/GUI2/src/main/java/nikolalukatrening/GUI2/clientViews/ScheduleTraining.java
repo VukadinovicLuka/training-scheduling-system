@@ -16,6 +16,7 @@ import java.util.List;
 import nikolalukatrening.GUI2.customTable.DateLabelFormatter;
 import nikolalukatrening.GUI2.dto.ClientProfileEditorDto;
 import nikolalukatrening.GUI2.dto.TrainingDto;
+import nikolalukatrening.GUI2.dto.UserDto;
 import nikolalukatrening.GUI2.service.impl.RestTemplateServiceImpl;
 import org.jdatepicker.JDatePicker;
 import org.jdatepicker.impl.JDatePanelImpl;
@@ -41,6 +42,7 @@ public class ScheduleTraining extends JPanel {
         private RestTemplate createTrainingTemplate;
         private Integer userId;
         private ClientProfileEditorDto client;
+        private ProfileEditor profileEditor;
 
         List<String> timeSlots = new ArrayList<>();
         public ScheduleTraining(GroupTraining groupTrainingReference, Integer userId) {
@@ -175,9 +177,6 @@ public class ScheduleTraining extends JPanel {
         trainingDto.setDate(localDate);
         trainingDto.setGymId(null);
 
-
-
-
         trainingDto.setUserId(userId);
 
         String time = (String) cbTime.getSelectedItem();
@@ -189,10 +188,42 @@ public class ScheduleTraining extends JPanel {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
         RequestEntity<TrainingDto> requestEntity = RequestEntity.post(URI.create("http://localhost:8082/api/training/createTraining")).headers(headers).body(trainingDto);
         ResponseEntity<TrainingDto> responseEntity = createTrainingTemplate.exchange(requestEntity, TrainingDto.class);
         fetchUnavailableTimes(localDate);
-        // treba poslati mail :
+
+        ResponseEntity<ClientProfileEditorDto> responseForClient = createTrainingTemplate.exchange(
+                "http://localhost:8080/api/client/" +userId,
+                HttpMethod.GET,
+                entity,
+                ClientProfileEditorDto.class);
+        int trening = responseForClient.getBody().getReservedTraining() + 1;
+        this.client = responseForClient.getBody();
+        UserDto userDto = new UserDto();
+        userDto.setPassword(client.getUser().getPassword());
+        userDto.setUsername(client.getUser().getUsername());
+        userDto.setEmail(client.getUser().getEmail());
+        userDto.setFirstName(client.getUser().getFirstName());
+        userDto.setLastName(client.getUser().getLastName());
+        userDto.setDateOfBirth(client.getUser().getDateOfBirth());
+        userDto.setRole(client.getUser().getRole());
+        ClientProfileEditorDto clientToUpdate = new ClientProfileEditorDto();
+        clientToUpdate.setUser(userDto);
+        clientToUpdate.setCardNumber(client.getCardNumber());
+        clientToUpdate.setReservedTraining(trening);
+        clientToUpdate.setId(Long.valueOf(userId));
+        clientToUpdate.setActivationToken(client.getActivationToken());
+        clientToUpdate.setIsActivated(client.getIsActivated());
+
+        RequestEntity<ClientProfileEditorDto> requestEntity1 = RequestEntity.put(URI.create("http://localhost:8080/api/client/" + userId)).headers(headers).body(clientToUpdate);
+
+
+        // Posaljite zahtev
+        ResponseEntity<ClientProfileEditorDto> responseEntity1 = createTrainingTemplate.exchange(requestEntity1, ClientProfileEditorDto.class);
+
+        profileEditor = new ProfileEditor();
+        profileEditor.loadProfileData(userId);
     }
     private void fetchUnavailableTimes(LocalDate date) {
         // This is just an example, you need to replace it with your actual REST call logic

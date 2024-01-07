@@ -126,6 +126,8 @@ public class ProfileEditor extends JPanel {
         setLastNameField(responseForClient.getBody().getUser().getLastName());
         setUsernameField(responseForClient.getBody().getUser().getUsername());
         setReservedTrainingsField(responseForClient.getBody().getReservedTraining());
+        this.revalidate();
+        this.repaint();
     }
 
 
@@ -264,7 +266,6 @@ public class ProfileEditor extends JPanel {
         if (responseEntity.getStatusCode() == HttpStatus.OK) {
             JOptionPane.showMessageDialog(null, "Uspesno ste promenili lozinku! Za prikaz lozinke idite na gmail nalog.");
             loadProfileData(id); // id korisnika je dobar
-
         } else {
             JOptionPane.showMessageDialog(null, "Doslo je do greske pri promeni lozinke!");
         }
@@ -298,6 +299,8 @@ public class ProfileEditor extends JPanel {
 
     public void setReservedTrainingsField(Integer reservedTrainings) {
         reservedTrainingsField.setText(String.valueOf(reservedTrainings));
+        this.revalidate();
+        this.repaint();
     }
 
     public void setEmailField(String email) {

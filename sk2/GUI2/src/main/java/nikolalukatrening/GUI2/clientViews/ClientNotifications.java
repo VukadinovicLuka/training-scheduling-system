@@ -28,7 +28,7 @@ public class ClientNotifications extends JPanel {
 
     private void initializeUI() {
         // Definisanje kolona za tabelu
-        String[] columnNames = {"Id","Ime", "Prezime", "Link", "Password","Primalac maila", "vrta notifikacije"};
+        String[] columnNames = {"Id","Ime", "Prezime", "Link", "Password","Primalac maila", "Vrsta notifikacije"};
 
         // Kreiranje modela tabele sa definisanim kolonama
         tableModel = new DefaultTableModel(columnNames, 0);
@@ -57,8 +57,6 @@ public class ClientNotifications extends JPanel {
                 HttpMethod.GET,
                 null,
                 new ParameterizedTypeReference<List<NotificationDto>>() {});
-
-
 
         if (notificationResponse.getStatusCode() == HttpStatus.OK) {
             List<NotificationDto> notificationsForClient = notificationResponse.getBody();
