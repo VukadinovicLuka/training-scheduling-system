@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 @Component
-public class TrainingReminderService {
+public class GroupTrainingReminderService {
 
     private RestTemplateServiceImpl restTemplateServiceImpl;
     private RestTemplate trainingRestTemplate;
@@ -29,8 +29,7 @@ public class TrainingReminderService {
     private String activationDestination;
     private MessageHelper messageHelper;
 
-    public TrainingReminderService(JmsTemplate jmsTemplate,
-                                   MessageHelper messageHelper, @Value("${destination.createActivation}") String activationDestination){
+    public GroupTrainingReminderService(JmsTemplate jmsTemplate, @Value("${destination.createActivation}") String activationDestination, MessageHelper messageHelper) {
         this.jmsTemplate = jmsTemplate;
         this.activationDestination = activationDestination;
         this.messageHelper = messageHelper;
@@ -61,30 +60,22 @@ public class TrainingReminderService {
         // Your database query logic goes here
         List<TrainingDto> trainings = fetchAllTrainings();
 
-        // get date and start time from trainings
-        // if date and start time is 24 hours from now, send email to user
         for (TrainingDto training : trainings) {
-            // treba da mi proveris da li je training 24 sata od sada
-            if (training.getDate() == null || training.getStartTime() == null) {
-                continue;
-            }
-            // proveri mi danasnji datum + 1 dan i da li je to isto kao datum iz traininga
-
-
-            LocalDate lt = LocalDate.now();
-            if (lt.plusDays(1).equals(training.getDate())) {
-                // proveri mi da li je vreme treninga 24 sata od sada
-                Calendar cal = Calendar.getInstance();
-                SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
-                String currentTime = sdf.format(cal.getTime());
-                if (currentTime.equals(training.getStartTime())) {
-                    if(!training.getIsGroupTraining() || (training.getIsGroupTraining() && training.getMaxParticipants()>2)){
-                        createEmailMessage(training);
-                        System.out.println("Sending email to user with id: " + training.getUserId());
+            if(training.getIsGroupTraining()){
+                LocalDate lt = LocalDate.now();
+                if (lt.plusDays(1).equals(training.getDate())) {
+                    // proveri mi da li je vreme treninga 24 sata od sada
+                    Calendar cal = Calendar.getInstance();
+                    SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+                    String currentTime = sdf.format(cal.getTime());
+                    if (currentTime.equals(training.getStartTime())) {
+                        if(training.getMaxParticipants() < 3) {
+                            createEmailMessage(training);
+                            System.out.println("Otkazivanje treninga korisniku sa id: " + training.getUserId());
+                        }
                     }
                 }
             }
-
         }
 
         System.out.println("Checking for training sessions 24 hours from now...");
@@ -110,9 +101,6 @@ public class TrainingReminderService {
                 ClientProfileEditorDto.class);
         ClientProfileEditorDto client = responseForClient.getBody();
 
-
-
-
         Map<String, String> params = new HashMap<>();
         params.put("ime", client.getUser().getFirstName());
         params.put("prezime", client.getUser().getLastName());
@@ -121,10 +109,11 @@ public class TrainingReminderService {
                 client.getUser().getEmail(),
                 "Reservation Email",
                 "Pozdrav," + params.get("ime") + " " + params.get("prezime") +
-                        "Podsetnik za trening datuma " + trainingDto.getDate() + " u " + trainingDto.getStartTime() + "h",
-                "REMINDER",
+                        ",zbog nedostatka clanova za sutrasnji grupni trening, trening se otkazuje.",
+                "CANCEL GROUP TRAINING",
                 params
         );
         jmsTemplate.convertAndSend(activationDestination, messageHelper.createTextMessage(emailMessage));
     }
+
 }
