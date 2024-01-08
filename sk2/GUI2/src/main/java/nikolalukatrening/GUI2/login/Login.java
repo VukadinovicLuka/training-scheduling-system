@@ -122,7 +122,7 @@ public class Login extends JFrame {
     private RequestEntity<TokenRequestDto> TokenRequestDtoRequestEntity() throws JsonProcessingException {
         String username = jTextField1.getText();
         String password = String.valueOf(jPasswordField1.getPassword());
-        System.out.println("123" + username + " " + password);
+//        System.out.println("123" + username + " " + password);
         TokenRequestDto tokenRequestDto = new TokenRequestDto(username, password);
 
         // Kreirajte header-e za zahtev
@@ -158,7 +158,7 @@ public class Login extends JFrame {
 
             // Obrada odgovora
             String token = responseForToken.getBody().getToken();
-            System.out.println("Token:" + token);
+//            System.out.println("Token:" + token);
             RequestEntity<TokenResponseDto> requestClaimsEntity = GetClaimsFromTokenRequestEntity(token);
             ResponseEntity<ClaimsResponseDto> responseForClaims = LogInServiceRestTemplate.exchange(
                     requestClaimsEntity,

@@ -21,4 +21,16 @@ public class TrainingDto {
     private Integer userId;
 
 
+    @Override
+    public String toString() {
+        return "TrainingDto{" +
+                "date=" + date +
+                ", isGroupTraining=" + isGroupTraining +
+                ", maxParticipants=" + maxParticipants +
+                ", startTime='" + startTime + '\'' +
+                ", trainingType='" + trainingType + '\'' +
+                ", gymId=" + gymId +
+                ", userId=" + userId +
+                '}';
+    }
 }

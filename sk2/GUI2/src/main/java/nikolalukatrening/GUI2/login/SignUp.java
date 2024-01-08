@@ -175,7 +175,7 @@ public class SignUp extends JFrame {
     private void jButton1ActionPerformed() throws JsonProcessingException {
         // Kreirajte RequestEntity
         RequestEntity<ClientCreateDto> requestEntity = clientCreateDtoRequestEntity();
-        System.out.println("request Entity: " + requestEntity);
+//        System.out.println("request Entity: " + requestEntity);
         try {
             // Pošaljite zahtev koristeći RestTemplate
             ResponseEntity<ClientDto> response = SignUpServiceRestTemplate.exchange(

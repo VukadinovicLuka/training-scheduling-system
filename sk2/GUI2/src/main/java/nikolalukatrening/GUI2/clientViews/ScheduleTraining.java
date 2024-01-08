@@ -41,6 +41,7 @@ public class ScheduleTraining extends JPanel {
         private RestTemplateServiceImpl restTemplateServiceImpl;
         private RestTemplate createTrainingTemplate;
         private RestTemplate partcipantsTemplate;
+        private RestTemplate updateTrainingTemplate;
         private Integer userId;
         private ClientProfileEditorDto client;
         private ProfileEditor profileEditor;
@@ -153,12 +154,14 @@ public class ScheduleTraining extends JPanel {
         }
 
         public void updateParticipantsTraining(TrainingDto trainingDto){
-            createTrainingTemplate = restTemplateServiceImpl.setupRestTemplate(createTrainingTemplate);
+            System.out.println(trainingDto);
+            updateTrainingTemplate = restTemplateServiceImpl.setupRestTemplate(updateTrainingTemplate);
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
             RequestEntity<TrainingDto> requestEntity = RequestEntity.put(URI.create("http://localhost:8082/api/training/updateTraining")).headers(headers).body(trainingDto);
-            ResponseEntity<TrainingDto> responseEntity = createTrainingTemplate.exchange(requestEntity, TrainingDto.class);
+            ResponseEntity<TrainingDto> responseEntity = updateTrainingTemplate.exchange(requestEntity, TrainingDto.class);
+//            System.out.println("response: " + responseEntity.getBody());
         }
 
     private void zakazivanje() {
@@ -173,16 +176,19 @@ public class ScheduleTraining extends JPanel {
             Set<TrainingDto> treninzi = fetchAllTrainings();
             int flag = 0;
             for(TrainingDto trainingDto1: treninzi){
+//                System.out.println("TrainingDto1: " + trainingDto1);
                 String time = (String) cbTime.getSelectedItem();
                 String[] prvo = time.split("-");
                 Date date = (Date) datePicker.getModel().getValue();
                 LocalDate localDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-                System.out.println("LocalDate: " + localDate );
-                System.out.println("TrainingDto1Date: " + trainingDto1.getDate());
-                System.out.println("Prvo: " + prvo);
-                System.out.println("Startime treninga: " + trainingDto1.getStartTime());
+//                System.out.println("---------------------");
+//                System.out.println("LocalDate: " + localDate );
+//                System.out.println("TrainingDto1Date: " + trainingDto1.getDate());
+//                System.out.println("Prvo: " + prvo);
+//                System.out.println("Startime treninga: " + trainingDto1.getStartTime());
+//                System.out.println("---------------------");
+
                 if(trainingDto1.getDate().equals(localDate) && trainingDto1.getStartTime().equals(prvo[0])){
-                    System.out.println("PRONASAO SAM DATI TERMIN");
                     trainingDto1.setMaxParticipants(trainingDto1.getMaxParticipants()+1);
                     updateParticipantsTraining(trainingDto1);
                     trainingDto.setMaxParticipants(trainingDto1.getMaxParticipants());

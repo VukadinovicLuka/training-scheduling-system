@@ -8,6 +8,7 @@ import nikolalukatrening.Zakazivanje_servis.message.MessageHelper;
 import nikolalukatrening.Zakazivanje_servis.model.Training;
 import nikolalukatrening.Zakazivanje_servis.repository.TrainingRepository;
 import nikolalukatrening.Zakazivanje_servis.service.TrainingService;
+import org.hibernate.id.AbstractPostInsertGenerator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.jms.core.JmsTemplate;
@@ -50,9 +51,18 @@ public class TrainingServiceImpl implements TrainingService {
 
     @Override
     public Training update(TrainingDto trainingDto) {
-        Training training = trainingMapper.trainingDtoToTraining(trainingDto);
-        training = trainingRepository.save(training);
-        return training;
+
+        // zelim da nadjem trening koji ima isti datum, vreme i maxParticipants - 1 u odnosu na trainingDto
+        Training training = trainingRepository.findByDateAndStartTimeAndMaxParticipants(trainingDto.getDate(),trainingDto.getStartTime(),trainingDto.getMaxParticipants()-1).orElseThrow(()->new RuntimeException());
+
+        training.setTrainingType(trainingDto.getTrainingType());
+        training.setIsGroupTraining(trainingDto.getIsGroupTraining());
+        training.setDate(trainingDto.getDate());
+        training.setStartTime(trainingDto.getStartTime());
+        training.setGym(null);
+        training.setUserId(trainingDto.getUserId());
+        training.setMaxParticipants(trainingDto.getMaxParticipants());
+        return trainingRepository.save(training);
     }
 
 //    @Override
