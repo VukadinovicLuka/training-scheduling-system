@@ -40,6 +40,7 @@ public class ScheduleTraining extends JPanel {
         private RestTemplate timeRestTemplate;
         private RestTemplateServiceImpl restTemplateServiceImpl;
         private RestTemplate createTrainingTemplate;
+        private RestTemplate partcipantsTemplate;
         private Integer userId;
         private ClientProfileEditorDto client;
         private ProfileEditor profileEditor;
@@ -151,6 +152,15 @@ public class ScheduleTraining extends JPanel {
             styleComponents();
         }
 
+        public void updateParticipantsTraining(TrainingDto trainingDto){
+            createTrainingTemplate = restTemplateServiceImpl.setupRestTemplate(createTrainingTemplate);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
+            RequestEntity<TrainingDto> requestEntity = RequestEntity.put(URI.create("http://localhost:8082/api/training/updateTraining")).headers(headers).body(trainingDto);
+            ResponseEntity<TrainingDto> responseEntity = createTrainingTemplate.exchange(requestEntity, TrainingDto.class);
+        }
+
     private void zakazivanje() {
         if (cbTrainingType.getSelectedItem() == null || datePicker.getModel().getValue() == null || cbTrainingOptions.getSelectedItem() == null || cbTime.getSelectedItem() == null) {
             JOptionPane.showMessageDialog(null, "Morate odabrati sve podatke!");
@@ -159,9 +169,29 @@ public class ScheduleTraining extends JPanel {
         TrainingDto trainingDto = new TrainingDto();
         trainingDto.setTrainingType((String) cbTrainingOptions.getSelectedItem());
         if (cbTrainingType.getSelectedItem().equals("Grupno")){
-            System.out.println("usao");
             trainingDto.setIsGroupTraining(true);
-            trainingDto.setMaxParticipants(12);
+            Set<TrainingDto> treninzi = fetchAllTrainings();
+            int flag = 0;
+            for(TrainingDto trainingDto1: treninzi){
+                String time = (String) cbTime.getSelectedItem();
+                String[] prvo = time.split("-");
+                Date date = (Date) datePicker.getModel().getValue();
+                LocalDate localDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                System.out.println("LocalDate: " + localDate );
+                System.out.println("TrainingDto1Date: " + trainingDto1.getDate());
+                System.out.println("Prvo: " + prvo);
+                System.out.println("Startime treninga: " + trainingDto1.getStartTime());
+                if(trainingDto1.getDate().equals(localDate) && trainingDto1.getStartTime().equals(prvo[0])){
+                    System.out.println("PRONASAO SAM DATI TERMIN");
+                    trainingDto1.setMaxParticipants(trainingDto1.getMaxParticipants()+1);
+                    updateParticipantsTraining(trainingDto1);
+                    trainingDto.setMaxParticipants(trainingDto1.getMaxParticipants());
+                    flag = 1;
+                }
+            }
+            if(flag==0){
+                trainingDto.setMaxParticipants(1);
+            }
         }
         if(cbTrainingType.getSelectedItem().equals("Individualno")) {
             trainingDto.setIsGroupTraining(false);
@@ -185,11 +215,11 @@ public class ScheduleTraining extends JPanel {
         trainingDto.setStartTime(prvo[0]);
 
         createTrainingTemplate = restTemplateServiceImpl.setupRestTemplate(createTrainingTemplate);
-
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
         RequestEntity<TrainingDto> requestEntity = RequestEntity.post(URI.create("http://localhost:8082/api/training/createTraining")).headers(headers).body(trainingDto);
+
         ResponseEntity<TrainingDto> responseEntity = createTrainingTemplate.exchange(requestEntity, TrainingDto.class);
         fetchUnavailableTimes(localDate);
 
@@ -198,6 +228,7 @@ public class ScheduleTraining extends JPanel {
                 HttpMethod.GET,
                 entity,
                 ClientProfileEditorDto.class);
+
         int trening = responseForClient.getBody().getReservedTraining() + 1;
         this.client = responseForClient.getBody();
         UserDto userDto = new UserDto();
@@ -218,7 +249,6 @@ public class ScheduleTraining extends JPanel {
 
         RequestEntity<ClientProfileEditorDto> requestEntity1 = RequestEntity.put(URI.create("http://localhost:8080/api/client/" + userId)).headers(headers).body(clientToUpdate);
 
-
         // Posaljite zahtev
         ResponseEntity<ClientProfileEditorDto> responseEntity1 = createTrainingTemplate.exchange(requestEntity1, ClientProfileEditorDto.class);
 
@@ -227,6 +257,23 @@ public class ScheduleTraining extends JPanel {
     }
 
 
+
+    private Set<TrainingDto> fetchAllTrainings() {
+        restTemplateServiceImpl = new RestTemplateServiceImpl();
+        partcipantsTemplate = restTemplateServiceImpl.setupRestTemplate(partcipantsTemplate);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
+
+        ResponseEntity<Set<TrainingDto>> responseForClient = partcipantsTemplate.exchange(
+                "http://localhost:8082/api/training/all",
+                HttpMethod.GET,
+                entity,
+                new ParameterizedTypeReference<Set<TrainingDto>>() {});
+        Set<TrainingDto> training = responseForClient.getBody();
+        return training;
+    }
 
 
     private void fetchUnavailableTimes(LocalDate date) {
@@ -245,21 +292,94 @@ public class ScheduleTraining extends JPanel {
     private void updateComboBox(List<String> unavailableTimes) {
         // First, clear the ComboBox
         cbTime.removeAllItems();
+        Object selectedItem = cbTrainingType.getSelectedItem();
+        String selectedType = selectedItem.toString();
+            Date selectedDate = (Date) datePicker.getModel().getValue();
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(selectedDate);
+            int dan = calendar.get(Calendar.DAY_OF_WEEK);
         // Add all times, but skip the ones that are unavailable
-        for (String timeSlot : timeSlots) {
-            String[] part = timeSlot.split("-");
-            if (!unavailableTimes.contains(part[0].trim())) {
-                cbTime.addItem(timeSlot);
+        if("Individualno".equals(selectedType)) {
+            for (String timeSlot : timeSlots) {
+                String[] part = timeSlot.split("-");
+                if (!unavailableTimes.contains(part[0].trim())) {
+                    cbTime.addItem(timeSlot);
+                }
+            }
+            if(dan==1){
+                cbTime.removeItem("08:00-09:00");
+                cbTime.removeItem("12:00-13:00");
+                cbTime.removeItem("17:00-18:00");
+            } else if(dan==2){
+                cbTime.removeItem("09:00-10:00");
+                cbTime.removeItem("13:00-14:00");
+                cbTime.removeItem("21:00-22:00");
+            } else if(dan==3){
+                cbTime.removeItem("09:00-10:00");
+                cbTime.removeItem("11:00-12:00");
+                cbTime.removeItem("20:00-21:00");
+            } else if(dan==4){
+                cbTime.removeItem("14:00-15:00");
+                cbTime.removeItem("19:00-20:00");
+                cbTime.removeItem("22:00-23:00");
+            } else if(dan==5){
+                cbTime.removeItem("09:00-10:00");
+                cbTime.removeItem("12:00-13:00");
+                cbTime.removeItem("18:00-19:00");
+            } else if(dan==6){
+                cbTime.removeItem("10:00-11:00");
+                cbTime.removeItem("12:00-13:00");
+                cbTime.removeItem("20:00-21:00");
+            } else if(dan==7){
+                cbTime.removeItem("10:00-11:00");
+                cbTime.removeItem("15:00-16:00");
+            }
+        } else {
+            if(dan==1){
+                cbTime.addItem("08:00-09:00");
+                cbTime.addItem("12:00-13:00");
+                cbTime.addItem("17:00-18:00");
+            } else if(dan==2){
+                cbTime.addItem("09:00-10:00");
+                cbTime.addItem("13:00-14:00");
+                cbTime.addItem("21:00-22:00");
+            } else if(dan==3){
+                cbTime.addItem("09:00-10:00");
+                cbTime.addItem("11:00-12:00");
+                cbTime.addItem("20:00-21:00");
+            } else if(dan==4){
+                cbTime.addItem("14:00-15:00");
+                cbTime.addItem("19:00-20:00");
+                cbTime.addItem("22:00-23:00");
+            } else if(dan==5){
+                cbTime.addItem("09:00-10:00");
+                cbTime.addItem("12:00-13:00");
+                cbTime.addItem("18:00-19:00");
+            } else if(dan==6){
+                cbTime.addItem("10:00-11:00");
+                cbTime.addItem("12:00-13:00");
+                cbTime.addItem("20:00-21:00");
+            } else if(dan==7){
+                cbTime.addItem("10:00-11:00");
+                cbTime.addItem("15:00-16:00");
             }
         }
     }
 
         private void updateTrainingOptions() {
             cbTrainingOptions.removeAllItems();
+            Date selectedDate = (Date) datePicker.getModel().getValue();
+            if (selectedDate != null) {
+                // Convert Date to LocalDate or the format required by your backend
+                LocalDate localDate = selectedDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                // Now fetch the unavailable times for this date
+                fetchUnavailableTimes(localDate);
+            }
             Object selectedItem = cbTrainingType.getSelectedItem();
             if (selectedItem != null) {
                 String selectedType = selectedItem.toString();
                 if ("Individualno".equals(selectedType)) {
+
                     cbTrainingOptions.addItem("Kalistenika");
                     cbTrainingOptions.addItem("Powerlifting");
                 } else if ("Grupno".equals(selectedType)) {

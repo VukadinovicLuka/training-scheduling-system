@@ -1,6 +1,5 @@
 package nikolalukatrening.Zakazivanje_servis.service.impl;
 
-
 import nikolalukatrening.Zakazivanje_servis.dto.ClientProfileEditorDto;
 import nikolalukatrening.Zakazivanje_servis.dto.EmailMessageDto;
 import nikolalukatrening.Zakazivanje_servis.dto.TrainingDto;
@@ -49,7 +48,20 @@ public class TrainingServiceImpl implements TrainingService {
         return training;
     }
 
+    @Override
+    public Training update(TrainingDto trainingDto) {
+        Training training = trainingMapper.trainingDtoToTraining(trainingDto);
+        training = trainingRepository.save(training);
+        return training;
+    }
 
+//    @Override
+//    public ClientDto update(ClientUpdateDto clientUpdateDto) {
+//        Client client = clientRepository.findByUserUsername(clientUpdateDto.getOldUsername()).orElseThrow(()->new RuntimeException());
+//        client = clientMapper.clientUpdateToClient(client,clientUpdateDto);
+//        client = clientRepository.save(client);
+//        return clientMapper.clientToClientDto(client);
+//    }
 
     private void createEmailMessage(TrainingDto trainingDto) {
 

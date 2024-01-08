@@ -49,5 +49,8 @@ public class TrainingController {
         return new ResponseEntity<>(trainingService.add(trainingDto), HttpStatus.CREATED);
     }
 
-
+    @PutMapping("/updateTraining")
+    public ResponseEntity<Training> updateTraining(@RequestBody @Valid TrainingDto trainingDto) {
+        return new ResponseEntity<>(trainingService.update(trainingDto), HttpStatus.OK);
+    }
 }

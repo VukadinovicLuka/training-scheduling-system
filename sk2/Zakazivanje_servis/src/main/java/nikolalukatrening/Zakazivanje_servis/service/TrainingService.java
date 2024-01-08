@@ -11,4 +11,6 @@ public interface TrainingService {
 
     Training add(TrainingDto trainingDto);
 
+    Training update(TrainingDto trainingDto);
+
 }
