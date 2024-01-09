@@ -172,8 +172,10 @@ public class ClientsTrainings extends JPanel {
             List<TrainingDto> trainingsForClient = trainingResponse.getBody();
             if (trainingsForClient != null) {
                 for (TrainingDto trainingDto : trainingsForClient) {
-                    tableModel.addRow(new Object[]{trainingDto.getDate(), trainingDto.getIsGroupTraining(), trainingDto.getMaxParticipants(),
-                            trainingDto.getStartTime(), trainingDto.getTrainingType(), trainingDto.getUserId()});
+                    if(trainingDto.getIsAvailable()) {
+                        tableModel.addRow(new Object[]{trainingDto.getDate(), trainingDto.getIsGroupTraining(), trainingDto.getMaxParticipants(),
+                                trainingDto.getStartTime(), trainingDto.getTrainingType(), trainingDto.getUserId()});
+                    }
                 }
             } else {
                 showNoTrainingsMessage();
@@ -187,7 +189,6 @@ public class ClientsTrainings extends JPanel {
             }
         }
     }
-
 
     private void showNoTrainingsMessage() {
         // Remove all existing rows
