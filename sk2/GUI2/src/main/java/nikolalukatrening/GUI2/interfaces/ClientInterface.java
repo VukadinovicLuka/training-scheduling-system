@@ -13,6 +13,7 @@ public class ClientInterface extends JFrame {
     private JToolBar toolBar;
     private ProfileEditor profileEditorView; // This will hold the ProfileEditor instance
     private ClientNotifications clientNotificationsView;
+    ClientsTrainings clientsTrainings;
     private Integer userId; // This will hold the user ID for the logged-in user
 
     public ClientInterface(Integer userId) {
@@ -32,19 +33,17 @@ public class ClientInterface extends JFrame {
         // Initialize other views
         GroupTraining groupTrainingView = new GroupTraining();
         ScheduleTraining scheduleTrainingView = new ScheduleTraining(groupTrainingView, this.userId);
-        RateCoachOrGym rateCoachOrGymView = new RateCoachOrGym();
 //        ClientNotifications clientNotificationsView = new ClientNotifications();
 
         // Add other views to cardPanel
         cardPanel.add(scheduleTrainingView, "schedule");
         cardPanel.add(groupTrainingView, "group");
-        cardPanel.add(rateCoachOrGymView, "rate");
 
         // Add buttons to toolbar
         addButtonToToolbar("Zakazivanje treninga", "schedule", "schedule.png");
         addButtonToToolbar("Pregled i izmena ličnih podataka", "profile", "edit.png");
         addButtonToToolbar("Prijavljivanje na grupne treninge", "group", "group.png");
-        addButtonToToolbar("Ocena trenera ili teretane", "rate", "rate.png");
+        addButtonToToolbar("Treninzi korisnika", "trainings", "rate.png");
         addButtonToToolbar("Poslate notifikacije korisniku", "notifications", "rate.png");
 
         // Add toolBar and cardPanel to frame
@@ -76,6 +75,10 @@ public class ClientInterface extends JFrame {
             clientNotificationsView = new ClientNotifications();
             clientNotificationsView.loadNotifications(this.userId);
             cardPanel.add(clientNotificationsView, "notifications");
+        } else if("trainings".equals(e.getActionCommand())){
+            clientsTrainings = new ClientsTrainings();
+            clientsTrainings.loadTrainings(this.userId);
+            cardPanel.add(clientsTrainings,"trainings");
         }
         cardLayout.show(cardPanel, e.getActionCommand());
     }

@@ -40,7 +40,6 @@ public class ClientNotifications extends JPanel {
 
         // Dodavanje scrollPane-a (sa tabelom) u centralni deo panela
         add(scrollPane, BorderLayout.CENTER);
-
     }
 
 // TODO: kada se promeni lozinka, ne radi refresh tabele
@@ -69,7 +68,5 @@ public class ClientNotifications extends JPanel {
             // Obavestite korisnika da notifikacije nisu pronađene
             JOptionPane.showMessageDialog(null, "Notifikacije nisu pronađene.");
         }
-
-
     }
 }

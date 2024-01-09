@@ -65,6 +65,20 @@ public class TrainingServiceImpl implements TrainingService {
         return trainingRepository.save(training);
     }
 
+    @Override
+    public Training updateReserve(TrainingDto trainingDto) {
+        Training training = trainingRepository.findByDateAndStartTimeAndUserId(trainingDto.getDate(),trainingDto.getStartTime(), Long.valueOf(trainingDto.getUserId())).orElseThrow(()->new RuntimeException());
+
+        training.setTrainingType(trainingDto.getTrainingType());
+        training.setIsGroupTraining(trainingDto.getIsGroupTraining());
+        training.setDate(trainingDto.getDate());
+        training.setStartTime(trainingDto.getStartTime());
+        training.setGym(null);
+        training.setUserId(trainingDto.getUserId());
+        training.setMaxParticipants(trainingDto.getMaxParticipants());
+        return trainingRepository.save(training);
+    }
+
 //    @Override
 //    public ClientDto update(ClientUpdateDto clientUpdateDto) {
 //        Client client = clientRepository.findByUserUsername(clientUpdateDto.getOldUsername()).orElseThrow(()->new RuntimeException());

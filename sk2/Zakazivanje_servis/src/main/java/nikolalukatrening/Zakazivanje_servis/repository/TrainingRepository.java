@@ -6,7 +6,6 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Repository
@@ -17,4 +16,7 @@ public interface TrainingRepository extends JpaRepository<Training,Long> {
         Optional<Training> findByDateAndStartTime(LocalDate date, String startTime);
 
         Optional<Training> findByDateAndStartTimeAndMaxParticipants(LocalDate date, String startTime, Integer i);
+        List<Training> findAllByUserId(Long userId);
+
+        Optional<Training> findByDateAndStartTimeAndUserId(LocalDate date, String startTime, Long i);
 }

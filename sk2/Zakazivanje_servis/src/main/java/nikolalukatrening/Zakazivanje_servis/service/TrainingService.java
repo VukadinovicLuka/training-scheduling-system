@@ -13,4 +13,5 @@ public interface TrainingService {
 
     Training update(TrainingDto trainingDto);
 
+    Training updateReserve(TrainingDto trainingDto);
 }

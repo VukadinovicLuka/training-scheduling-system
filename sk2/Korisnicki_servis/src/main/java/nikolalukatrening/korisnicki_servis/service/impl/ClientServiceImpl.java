@@ -155,7 +155,6 @@ public class ClientServiceImpl implements ClientService {
         client.setReservedTraining(clientAdminDto.getReservedTraining());
         client.setId(id);
 
-
         clientRepository.save(client);
         return clientMapper.clientToClientAdminDto(client);
     }

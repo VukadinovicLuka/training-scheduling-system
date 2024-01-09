@@ -27,7 +27,7 @@ public class TestDataRunner implements CommandLineRunner {
 ////        LocalDate date2 = dateFormat.parse("28.12.2023");
 //        LocalDate date1 = LocalDate.of(2024, 1, 2);
 //        LocalDate date2 = LocalDate.of(2023,12,28);
-            LocalDate date3 = LocalDate.of(2024,1,9);
+//        LocalDate date3 = LocalDate.of(2024,1,9);
 //        Training training1 = new Training();
 //        training1.setStartTime("08:00");
 //        training1.setDate(date1); // You should set this to the actual date you want
@@ -60,35 +60,35 @@ public class TestDataRunner implements CommandLineRunner {
 //
 //        trainingRepository.save(training3);
 //
-        Training training4 = new Training();
-        training4.setStartTime("22:00");
-        training4.setDate(date3); // You should set this to the actual date you want
-        training4.setTrainingType("Pilates");
-        training4.setIsGroupTraining(true);
-        training4.setMaxParticipants(2);
-        training4.setUserId(1);
-
-        trainingRepository.save(training4);
-
-        Training training5 = new Training();
-        training5.setStartTime("22:00");
-        training5.setDate(date3); // You should set this to the actual date you want
-        training5.setTrainingType("Pilates");
-        training5.setIsGroupTraining(true);
-        training5.setMaxParticipants(4);
-        training5.setUserId(3);
-
-        trainingRepository.save(training5);
-
-        Training training6 = new Training();
-        training6.setStartTime("22:00");
-        training6.setDate(date3); // You should set this to the actual date you want
-        training6.setTrainingType("Pilates");
-        training6.setIsGroupTraining(true);
-        training6.setMaxParticipants(2);
-        training6.setUserId(2);
-
-        trainingRepository.save(training6);
+//        Training training4 = new Training();
+//        training4.setStartTime("22:00");
+//        training4.setDate(date3); // You should set this to the actual date you want
+//        training4.setTrainingType("Pilates");
+//        training4.setIsGroupTraining(true);
+//        training4.setMaxParticipants(2);
+//        training4.setUserId(1);
+//
+//        trainingRepository.save(training4);
+//
+//        Training training5 = new Training();
+//        training5.setStartTime("22:00");
+//        training5.setDate(date3); // You should set this to the actual date you want
+//        training5.setTrainingType("Pilates");
+//        training5.setIsGroupTraining(true);
+//        training5.setMaxParticipants(4);
+//        training5.setUserId(3);
+//
+//        trainingRepository.save(training5);
+//
+//        Training training6 = new Training();
+//        training6.setStartTime("22:00");
+//        training6.setDate(date3); // You should set this to the actual date you want
+//        training6.setTrainingType("Pilates");
+//        training6.setIsGroupTraining(true);
+//        training6.setMaxParticipants(2);
+//        training6.setUserId(2);
+//
+//        trainingRepository.save(training6);
 
         // ... Create more training instances if needed
     }

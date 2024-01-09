@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -42,7 +43,6 @@ public class TrainingController {
         return ResponseEntity.ok(startTimes);
     }
 
-
     @PostMapping("/createTraining")
     public ResponseEntity<Training> registerClient(@RequestBody @Valid TrainingDto trainingDto) {
         // Logika za slanje zahteva ka notifikacionom servisu preko message brokera
@@ -53,4 +53,34 @@ public class TrainingController {
     public ResponseEntity<Training> updateTraining(@RequestBody @Valid TrainingDto trainingDto) {
         return new ResponseEntity<>(trainingService.update(trainingDto), HttpStatus.OK);
     }
+
+    @PutMapping("/updateTrainingReserve")
+    public ResponseEntity<Training> updateTrainingReserve(@RequestBody @Valid TrainingDto trainingDto) {
+        return new ResponseEntity<>(trainingService.updateReserve(trainingDto), HttpStatus.OK);
+    }
+
+    @GetMapping("/by-user/{userId}")
+    public ResponseEntity<List<Training>> getTrainingsByUserId(@PathVariable Long userId) {
+        List<Training> trainings = trainingRepository.findAllByUserId(userId);
+        if (trainings.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(trainings);
+    }
+
+    @DeleteMapping("/deleteTraining")
+    public ResponseEntity<Void> deleteTraining(
+            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @RequestParam("startTime") String startTime,
+            @RequestParam("userId") Long userId) {
+
+        Optional<Training> trainingOptional = trainingRepository.findByDateAndStartTimeAndUserId(date, startTime, userId);
+        if (trainingOptional.isPresent()) {
+            trainingRepository.delete(trainingOptional.get());
+            return ResponseEntity.ok().build(); // Successfully deleted
+        } else {
+            return ResponseEntity.notFound().build(); // Training not found
+        }
+    }
+
 }
