@@ -16,6 +16,7 @@ public class TrainingMapper {
         training.setGym(null);
         training.setMaxParticipants(trainingDto.getMaxParticipants());
         training.setUserId(trainingDto.getUserId());
+        training.setIsAvailable(trainingDto.getIsAvailable());
         return training;
     }
 
@@ -28,6 +29,7 @@ public class TrainingMapper {
 //        trainingDto.setGym(null);
         trainingDto.setMaxParticipants(training.getMaxParticipants());
         trainingDto.setUserId(training.getUserId());
+        trainingDto.setIsAvailable(training.getIsAvailable());
         return trainingDto;
     }
 

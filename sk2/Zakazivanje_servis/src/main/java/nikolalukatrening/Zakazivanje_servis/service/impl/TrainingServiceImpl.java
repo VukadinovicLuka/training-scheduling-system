@@ -64,6 +64,7 @@ public class TrainingServiceImpl implements TrainingService {
         training.setGym(null);
         training.setUserId(trainingDto.getUserId());
         training.setMaxParticipants(trainingDto.getMaxParticipants());
+        training.setIsAvailable(trainingDto.getIsAvailable());
         return trainingRepository.save(training);
     }
 
@@ -78,6 +79,7 @@ public class TrainingServiceImpl implements TrainingService {
         training.setGym(null);
         training.setUserId(trainingDto.getUserId());
         training.setMaxParticipants(trainingDto.getMaxParticipants());
+        training.setIsAvailable(trainingDto.getIsAvailable());
         return trainingRepository.save(training);
     }
 
@@ -113,10 +115,6 @@ public class TrainingServiceImpl implements TrainingService {
                 entity,
                 ClientProfileEditorDto.class);
         ClientProfileEditorDto client = responseForClient.getBody();
-
-
-
-
 
         Map<String, String> params = new HashMap<>();
         params.put("ime", client.getUser().getFirstName());

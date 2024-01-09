@@ -22,6 +22,7 @@ public class Training {
     private Boolean isGroupTraining;
     private Integer maxParticipants;
     private Integer userId;
+    private Boolean isAvailable;
 
     // Dodajte ostale potrebne atribute
 

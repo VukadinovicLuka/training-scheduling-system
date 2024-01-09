@@ -81,6 +81,7 @@ public class ClientsTrainings extends JPanel {
     private void performCancellation(int row) {
 
         Boolean isGroupTraining = (Boolean) tableModel.getValueAt(row, 1);
+        String trainingType = (String) tableModel.getValueAt(row, 4);
         int participants = (int) tableModel.getValueAt(row,2);
         String vreme = (String) tableModel.getValueAt(row,3);
         LocalDate localDate = (LocalDate) tableModel.getValueAt(row,0);
@@ -101,7 +102,19 @@ public class ClientsTrainings extends JPanel {
         }
 
         //pozivamo DELETE rutu za trening i put metodu za rezervisane treninge
-        callDeleteTrainingRoute(localDate,vreme,userId);
+//        activateAvailableTrainingRoute(localDate,vreme,userId);
+        TrainingDto tra = new TrainingDto();
+        tra.setDate(localDate);
+        tra.setStartTime(vreme);
+        tra.setMaxParticipants(participants);
+        tra.setIsGroupTraining(isGroupTraining);
+        tra.setIsAvailable(false);
+        tra.setGymId(null);
+        tra.setTrainingType(trainingType);
+        tra.setUserId(userId);
+
+
+        updateParticipantsTraining(tra);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -212,7 +225,7 @@ public class ClientsTrainings extends JPanel {
 
     // In your frontend Java code where you handle the cancellation
 
-    public void callDeleteTrainingRoute(LocalDate date, String startTime, int userId) {
+    public void activateAvailableTrainingRoute(LocalDate date, String startTime, int userId) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> entity = new HttpEntity<>("parameters", headers);

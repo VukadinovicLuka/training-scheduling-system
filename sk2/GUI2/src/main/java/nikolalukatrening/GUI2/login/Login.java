@@ -6,6 +6,7 @@ import lombok.Setter;
 import nikolalukatrening.GUI2.dto.*;
 import nikolalukatrening.GUI2.interfaces.AdminInterface;
 import nikolalukatrening.GUI2.interfaces.ClientInterface;
+import nikolalukatrening.GUI2.interfaces.ManagerInterface;
 import org.springframework.http.*;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -198,9 +199,9 @@ public class Login extends JFrame {
                      clientInterface.setVisible(true);
                      this.dispose();
                 } else if(claims.getRole().equals("ROLE_MANAGER")){
-//                    ManagerInterface managerFrame = new ManagerInterface();
-//                    managerFrame.setVisible(true);
-//                    this.dispose();
+                    ManagerInterface managerFrame = new ManagerInterface();
+                    managerFrame.setVisible(true);
+                    this.dispose();
                 } else {
                     JOptionPane.showMessageDialog(this, "GRESKA KOD ROLE", "Greška", JOptionPane.ERROR_MESSAGE);
                 }

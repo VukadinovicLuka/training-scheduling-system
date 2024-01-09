@@ -19,4 +19,7 @@ public interface TrainingRepository extends JpaRepository<Training,Long> {
         List<Training> findAllByUserId(Long userId);
 
         Optional<Training> findByDateAndStartTimeAndUserId(LocalDate date, String startTime, Long i);
+        // TrainingRepository.java
+        List<Training> findAllByDateAndIsAvailable(LocalDate date, boolean isAvailable);
+
 }

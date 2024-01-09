@@ -32,16 +32,29 @@ public class TrainingController {
         return ResponseEntity.ok(trainingRepository.findAll());
     }
 
+//    @GetMapping("/start-times")
+//    public ResponseEntity<List<String>> getStartTimesByDate(@RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+//        System.out.println(date);
+//        List<Training> trainings = trainingRepository.findAllByDate(date);
+//        System.out.println(trainings);
+//        List<String> startTimes = trainings.stream()
+//                .map(Training::getStartTime)
+//                .collect(Collectors.toList());
+//        return ResponseEntity.ok(startTimes);
+//    }
+
+    // TrainingController.java
     @GetMapping("/start-times")
-    public ResponseEntity<List<String>> getStartTimesByDate(@RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        System.out.println(date);
-        List<Training> trainings = trainingRepository.findAllByDate(date);
-        System.out.println(trainings);
+    public ResponseEntity<List<String>> getStartTimesByDate(
+            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+
+        List<Training> trainings = trainingRepository.findAllByDateAndIsAvailable(date, true);
         List<String> startTimes = trainings.stream()
                 .map(Training::getStartTime)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(startTimes);
     }
+
 
     @PostMapping("/createTraining")
     public ResponseEntity<Training> registerClient(@RequestBody @Valid TrainingDto trainingDto) {

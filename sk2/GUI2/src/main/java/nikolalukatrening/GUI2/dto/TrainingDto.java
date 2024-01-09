@@ -19,6 +19,7 @@ public class TrainingDto {
     private String trainingType;
     private Integer gymId;
     private Integer userId;
+    private Boolean isAvailable;
 
 
     @Override

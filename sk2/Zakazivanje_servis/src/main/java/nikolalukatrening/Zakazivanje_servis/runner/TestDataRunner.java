@@ -5,7 +5,9 @@ import java.time.LocalDate;
 import java.util.Date;
 
 import nikolalukatrening.Zakazivanje_servis.model.Training;
+import nikolalukatrening.Zakazivanje_servis.model.TrainingTypes;
 import nikolalukatrening.Zakazivanje_servis.repository.TrainingRepository;
+import nikolalukatrening.Zakazivanje_servis.repository.TrainingTypesRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
@@ -13,9 +15,11 @@ import org.springframework.stereotype.Component;
 public class TestDataRunner implements CommandLineRunner {
 
     private TrainingRepository trainingRepository;
+    private TrainingTypesRepository trainingTypesRepository;
 
-    public TestDataRunner(TrainingRepository trainingRepository) {
+    public TestDataRunner(TrainingRepository trainingRepository, TrainingTypesRepository trainingTypesRepository) {
         this.trainingRepository = trainingRepository;
+        this.trainingTypesRepository = trainingTypesRepository;
     }
 
     @Override
@@ -91,5 +95,31 @@ public class TestDataRunner implements CommandLineRunner {
 //        trainingRepository.save(training6);
 
         // ... Create more training instances if needed
+
+        TrainingTypes trainingTypes1 = new TrainingTypes();
+        trainingTypes1.setTrainingType("Yoga");
+        trainingTypes1.setTrainingSort("Grupno");
+        trainingTypes1.setTrainingTypePrice(1000);
+        trainingTypesRepository.save(trainingTypes1);
+
+        TrainingTypes trainingTypes2 = new TrainingTypes();
+        trainingTypes2.setTrainingType("Pilates");
+        trainingTypes2.setTrainingSort("Grupno");
+        trainingTypes2.setTrainingTypePrice(1500);
+        trainingTypesRepository.save(trainingTypes2);
+
+        TrainingTypes trainingTypes3 = new TrainingTypes();
+        trainingTypes3.setTrainingType("Kalistenika");
+        trainingTypes3.setTrainingSort("Individualno");
+        trainingTypes3.setTrainingTypePrice(2000);
+
+        trainingTypesRepository.save(trainingTypes3);
+
+        TrainingTypes trainingTypes4 = new TrainingTypes();
+        trainingTypes4.setTrainingType("Powerlifting");
+        trainingTypes4.setTrainingSort("Individualno");
+        trainingTypes4.setTrainingTypePrice(2500);
+
+        trainingTypesRepository.save(trainingTypes4);
     }
 }

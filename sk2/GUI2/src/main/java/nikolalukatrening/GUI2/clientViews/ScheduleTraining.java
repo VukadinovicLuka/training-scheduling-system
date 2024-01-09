@@ -36,7 +36,6 @@ public class ScheduleTraining extends JPanel {
         private Font comboFont = new Font("Arial", Font.PLAIN, 16);
         private Font buttonFont = new Font("Arial", Font.BOLD, 16);
         private JDatePicker datePicker;
-        private GroupTraining groupTrainingReference;
         private RestTemplate timeRestTemplate;
         private RestTemplateServiceImpl restTemplateServiceImpl;
         private RestTemplate createTrainingTemplate;
@@ -47,10 +46,9 @@ public class ScheduleTraining extends JPanel {
         private ProfileEditor profileEditor;
 
         List<String> timeSlots = new ArrayList<>();
-        public ScheduleTraining(GroupTraining groupTrainingReference, Integer userId) {
+        public ScheduleTraining(Integer userId) {
             this.userId = userId;
             this.restTemplateServiceImpl = new RestTemplateServiceImpl();
-            this.groupTrainingReference = groupTrainingReference;
             setLayout(new GridBagLayout());
             GridBagConstraints gbc = new GridBagConstraints();
             gbc.insets = new Insets(15, 15, 15, 15); // Dodaje razmak između komponenti
@@ -212,6 +210,7 @@ public class ScheduleTraining extends JPanel {
 
         trainingDto.setDate(localDate);
         trainingDto.setGymId(null);
+        trainingDto.setIsAvailable(true);
 
         trainingDto.setUserId(userId);
 
@@ -428,7 +427,6 @@ public class ScheduleTraining extends JPanel {
         int numberOfMembers = trainingType.equals("Individualno") ? 1 : (int) (Math.random() * 12 + 1);
 
         // Dodavanje reda u GroupTraining tabelu
-//        groupTrainingReference.addTrainingRow(trainingType, day, trainingOption, time, numberOfMembers);
     }
         private void styleComponents() {
             setBackground(Color.WHITE); // Postavite boju pozadine panela na belo

@@ -13,7 +13,6 @@ public class ClientInterface extends JFrame {
     private JToolBar toolBar;
     private ProfileEditor profileEditorView; // This will hold the ProfileEditor instance
     private ScheduleTraining scheduleTrainingView;
-    private GroupTraining groupTrainingView;
     private ClientNotifications clientNotificationsView;
     ClientsTrainings clientsTrainings;
     private Integer userId; // This will hold the user ID for the logged-in user
@@ -32,19 +31,13 @@ public class ClientInterface extends JFrame {
         cardPanel = new JPanel(cardLayout);
         toolBar = new JToolBar();
 
-        // Initialize other views
-        groupTrainingView = new GroupTraining();
-//        ClientNotifications clientNotificationsView = new ClientNotifications();
 
         // Add other views to cardPanel
-//        cardPanel.add(scheduleTrainingView, "schedule");
-        cardPanel.add(groupTrainingView, "group");
-        scheduleTrainingView = new ScheduleTraining(groupTrainingView, this.userId);
+        scheduleTrainingView = new ScheduleTraining(this.userId);
         cardPanel.add(scheduleTrainingView,"schedule");
         // Add buttons to toolbar
         addButtonToToolbar("Zakazivanje treninga", "schedule", "schedule.png");
         addButtonToToolbar("Pregled i izmena ličnih podataka", "profile", "edit.png");
-        addButtonToToolbar("Prijavljivanje na grupne treninge", "group", "group.png");
         addButtonToToolbar("Treninzi korisnika", "trainings", "rate.png");
         addButtonToToolbar("Poslate notifikacije korisniku", "notifications", "rate.png");
 
@@ -82,7 +75,7 @@ public class ClientInterface extends JFrame {
             clientsTrainings.loadTrainings(this.userId);
             cardPanel.add(clientsTrainings,"trainings");
         } else if("schedule".equals(e.getActionCommand())){
-            scheduleTrainingView = new ScheduleTraining(groupTrainingView, this.userId);
+            scheduleTrainingView = new ScheduleTraining(this.userId);
             cardPanel.add(scheduleTrainingView,"schedule");
         }
         cardLayout.show(cardPanel, e.getActionCommand());

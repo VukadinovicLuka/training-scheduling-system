@@ -79,8 +79,10 @@ public class TrainingReminderService {
                 String currentTime = sdf.format(cal.getTime());
                 if (currentTime.equals(training.getStartTime())) {
                     if(!training.getIsGroupTraining() || (training.getIsGroupTraining() && training.getMaxParticipants()>2)){
-                        createEmailMessage(training);
-                        System.out.println("Sending email to user with id: " + training.getUserId());
+                        if (training.getIsAvailable()){
+                            createEmailMessage(training);
+                            System.out.println("Sending email to user with id: " + training.getUserId());
+                        }
                     }
                 }
             }

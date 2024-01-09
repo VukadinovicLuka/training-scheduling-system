@@ -110,7 +110,7 @@ public class GroupTrainingReminderService {
                 "Reservation Email",
                 "Pozdrav," + params.get("ime") + " " + params.get("prezime") +
                         ",zbog nedostatka clanova za sutrasnji grupni trening, trening se otkazuje.",
-                "CANCEL GROUP TRAINING",
+                "CANCELLATION",
                 params
         );
         jmsTemplate.convertAndSend(activationDestination, messageHelper.createTextMessage(emailMessage));

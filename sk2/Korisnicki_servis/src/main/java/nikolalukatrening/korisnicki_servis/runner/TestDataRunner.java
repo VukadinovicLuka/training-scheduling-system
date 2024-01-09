@@ -3,8 +3,10 @@ package nikolalukatrening.korisnicki_servis.runner;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import nikolalukatrening.korisnicki_servis.model.Admin;
+import nikolalukatrening.korisnicki_servis.model.Manager;
 import nikolalukatrening.korisnicki_servis.model.User;
 import nikolalukatrening.korisnicki_servis.repository.AdminRepository;
+import nikolalukatrening.korisnicki_servis.repository.ManagerRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
@@ -17,9 +19,11 @@ import java.util.Base64;
 public class TestDataRunner implements CommandLineRunner {
 
     private AdminRepository adminRepository;
+    private ManagerRepository managerRepository;
 
-    public TestDataRunner(AdminRepository adminRepository){
+    public TestDataRunner(AdminRepository adminRepository, ManagerRepository managerRepository) {
         this.adminRepository = adminRepository;
+        this.managerRepository = managerRepository;
     }
 
     @Override
@@ -44,5 +48,21 @@ public class TestDataRunner implements CommandLineRunner {
         // admin.setOtherField("OtherValue");
 
         adminRepository.save(admin);
+
+        // manager
+        User user2 = new User();
+        user2.setUsername("manager");
+        user2.setPassword("manager"); // Šifra treba da bude enkriptovana
+        user2.setEmail("manager@gmail.com");
+        user2.setFirstName("Marko");
+        user2.setLastName("Markovic");
+        user2.setDateOfBirth("1970-01-01");
+        user2.setRole("ROLE_MANAGER");
+        Manager manager = new Manager();
+        manager.setDateOfHiring("2020-01-01");
+        manager.setGymName("Gym1");
+        manager.setUser(user2); // Setujemo ugnježdenog korisnika
+        managerRepository.save(manager);
+
     }
 }
