@@ -41,6 +41,7 @@ public class ScheduleTraining extends JPanel {
         private RestTemplate createTrainingTemplate;
         private RestTemplate partcipantsTemplate;
         private RestTemplate updateTrainingTemplate;
+        private RestTemplate updateComboBoxTemplate;
         private Integer userId;
         private ClientProfileEditorDto client;
         private ProfileEditor profileEditor;
@@ -65,7 +66,8 @@ public class ScheduleTraining extends JPanel {
             add(lblTitle, gbc);
 
             lblTrainingType = createLabel("Odaberite vrstu treninga:");
-            cbTrainingType = createComboBox(new String[]{"Individualno", "Grupno"});
+            cbTrainingType = new JComboBox<>();
+            fetchAndPopulateTrainingTypes();// ovde treba da se fetch za ova dva
             lblDayOfWeek = createLabel("Odaberite datum:");
             UtilDateModel model = new UtilDateModel();
             Properties p = new Properties();
@@ -161,6 +163,30 @@ public class ScheduleTraining extends JPanel {
             ResponseEntity<TrainingDto> responseEntity = updateTrainingTemplate.exchange(requestEntity, TrainingDto.class);
 //            System.out.println("response: " + responseEntity.getBody());
         }
+
+    public void fetchAndPopulateTrainingTypes() {
+        updateTrainingTemplate = restTemplateServiceImpl.setupRestTemplate(updateTrainingTemplate);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
+
+        String url = "http://localhost:8082/api/trainingType/all";
+
+        try {
+            ResponseEntity<Set<String>> response = updateTrainingTemplate.exchange(
+                    url, HttpMethod.GET, entity, new ParameterizedTypeReference<Set<String>>() {});
+
+            Set<String> trainingTypes = response.getBody();
+            if (trainingTypes != null) {
+                for (String type : trainingTypes) {
+                    cbTrainingType.addItem(type);
+                }
+            }
+        } catch (Exception e) {
+            // Handle exceptions
+            e.printStackTrace();
+        }
+    }
 
     private void zakazivanje() {
         if (cbTrainingType.getSelectedItem() == null || datePicker.getModel().getValue() == null || cbTrainingOptions.getSelectedItem() == null || cbTime.getSelectedItem() == null) {
@@ -384,17 +410,41 @@ public class ScheduleTraining extends JPanel {
             if (selectedItem != null) {
                 String selectedType = selectedItem.toString();
                 if ("Individualno".equals(selectedType)) {
-
-                    cbTrainingOptions.addItem("Kalistenika");
-                    cbTrainingOptions.addItem("Powerlifting");
+                    fetchAndSetTrainingOptions("Individualno");
                 } else if ("Grupno".equals(selectedType)) {
-                    cbTrainingOptions.addItem("Joga");
-                    cbTrainingOptions.addItem("Pilates");
+                    fetchAndSetTrainingOptions("Grupno");
                 }
             }
         }
 
-        private JLabel createLabel(String text) {
+    // In your Java Swing class
+
+    private void fetchAndSetTrainingOptions(String category) {
+        updateComboBoxTemplate = restTemplateServiceImpl.setupRestTemplate(updateComboBoxTemplate);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
+
+        try {
+            ResponseEntity<Set<String>> response = updateComboBoxTemplate.exchange(
+                    "http://localhost:8082/api/trainingType/by-category/" + category,
+                    HttpMethod.GET,
+                    entity,
+                    new ParameterizedTypeReference<Set<String>>() {});
+
+            Set<String> trainingTypes = response.getBody();
+            if (trainingTypes != null) {
+                cbTrainingOptions.removeAllItems();
+                trainingTypes.forEach(cbTrainingOptions::addItem);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            // Handle exceptions
+        }
+    }
+
+
+    private JLabel createLabel(String text) {
             JLabel label = new JLabel(text);
             label.setFont(labelFont);
             return label;
