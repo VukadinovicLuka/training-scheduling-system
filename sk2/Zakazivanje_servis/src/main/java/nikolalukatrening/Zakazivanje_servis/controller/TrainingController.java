@@ -68,19 +68,20 @@ public class TrainingController {
         return ResponseEntity.ok(trainings);
     }
 
+    // TrainingController.java
     @DeleteMapping("/deleteTraining")
     public ResponseEntity<Void> deleteTraining(
             @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
             @RequestParam("startTime") String startTime,
             @RequestParam("userId") Long userId) {
 
-        Optional<Training> trainingOptional = trainingRepository.findByDateAndStartTimeAndUserId(date, startTime, userId);
-        if (trainingOptional.isPresent()) {
-            trainingRepository.delete(trainingOptional.get());
+        boolean isDeleted = trainingService.deleteTraining(date, startTime, userId);
+        if (isDeleted) {
             return ResponseEntity.ok().build(); // Successfully deleted
         } else {
             return ResponseEntity.notFound().build(); // Training not found
         }
     }
+
 
 }

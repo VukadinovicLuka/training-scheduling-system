@@ -19,4 +19,16 @@ public class TrainingMapper {
         return training;
     }
 
+    public TrainingDto trainingToTrainingDto(Training training){
+        TrainingDto trainingDto = new TrainingDto();
+        trainingDto.setTrainingType(training.getTrainingType());
+        trainingDto.setIsGroupTraining(training.getIsGroupTraining());
+        trainingDto.setDate(training.getDate());
+        trainingDto.setStartTime(training.getStartTime());
+//        trainingDto.setGym(null);
+        trainingDto.setMaxParticipants(training.getMaxParticipants());
+        trainingDto.setUserId(training.getUserId());
+        return trainingDto;
+    }
+
 }

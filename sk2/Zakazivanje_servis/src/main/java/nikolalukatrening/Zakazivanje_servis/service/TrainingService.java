@@ -14,4 +14,6 @@ public interface TrainingService {
     Training update(TrainingDto trainingDto);
 
     Training updateReserve(TrainingDto trainingDto);
+
+    boolean deleteTraining(LocalDate date, String startTime, Long userId);
 }

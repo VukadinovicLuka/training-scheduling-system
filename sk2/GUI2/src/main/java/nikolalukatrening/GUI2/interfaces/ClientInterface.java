@@ -12,6 +12,8 @@ public class ClientInterface extends JFrame {
     private JPanel cardPanel;
     private JToolBar toolBar;
     private ProfileEditor profileEditorView; // This will hold the ProfileEditor instance
+    private ScheduleTraining scheduleTrainingView;
+    private GroupTraining groupTrainingView;
     private ClientNotifications clientNotificationsView;
     ClientsTrainings clientsTrainings;
     private Integer userId; // This will hold the user ID for the logged-in user
@@ -31,14 +33,14 @@ public class ClientInterface extends JFrame {
         toolBar = new JToolBar();
 
         // Initialize other views
-        GroupTraining groupTrainingView = new GroupTraining();
-        ScheduleTraining scheduleTrainingView = new ScheduleTraining(groupTrainingView, this.userId);
+        groupTrainingView = new GroupTraining();
 //        ClientNotifications clientNotificationsView = new ClientNotifications();
 
         // Add other views to cardPanel
-        cardPanel.add(scheduleTrainingView, "schedule");
+//        cardPanel.add(scheduleTrainingView, "schedule");
         cardPanel.add(groupTrainingView, "group");
-
+        scheduleTrainingView = new ScheduleTraining(groupTrainingView, this.userId);
+        cardPanel.add(scheduleTrainingView,"schedule");
         // Add buttons to toolbar
         addButtonToToolbar("Zakazivanje treninga", "schedule", "schedule.png");
         addButtonToToolbar("Pregled i izmena ličnih podataka", "profile", "edit.png");
@@ -79,6 +81,9 @@ public class ClientInterface extends JFrame {
             clientsTrainings = new ClientsTrainings();
             clientsTrainings.loadTrainings(this.userId);
             cardPanel.add(clientsTrainings,"trainings");
+        } else if("schedule".equals(e.getActionCommand())){
+            scheduleTrainingView = new ScheduleTraining(groupTrainingView, this.userId);
+            cardPanel.add(scheduleTrainingView,"schedule");
         }
         cardLayout.show(cardPanel, e.getActionCommand());
     }

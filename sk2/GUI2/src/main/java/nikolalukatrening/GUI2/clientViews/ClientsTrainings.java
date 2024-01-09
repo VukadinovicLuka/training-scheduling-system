@@ -137,6 +137,7 @@ public class ClientsTrainings extends JPanel {
         ResponseEntity<ClientProfileEditorDto> responseEntity1 = trainingsRestTemplate.exchange(requestEntity1, ClientProfileEditorDto.class);
 
         tableModel.removeRow(row);
+
     }
 
     public void loadTrainings(Integer id) {

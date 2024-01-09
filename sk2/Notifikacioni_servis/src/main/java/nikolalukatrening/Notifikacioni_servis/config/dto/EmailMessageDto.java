@@ -1,4 +1,4 @@
-package nikolalukatrening.Notifikacioni_servis.dto;
+package nikolalukatrening.Notifikacioni_servis.config.dto;
 
 
 import lombok.Getter;

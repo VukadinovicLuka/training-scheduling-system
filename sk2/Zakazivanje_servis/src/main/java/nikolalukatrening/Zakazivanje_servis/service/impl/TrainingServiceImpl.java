@@ -8,7 +8,6 @@ import nikolalukatrening.Zakazivanje_servis.message.MessageHelper;
 import nikolalukatrening.Zakazivanje_servis.model.Training;
 import nikolalukatrening.Zakazivanje_servis.repository.TrainingRepository;
 import nikolalukatrening.Zakazivanje_servis.service.TrainingService;
-import org.hibernate.id.AbstractPostInsertGenerator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.jms.core.JmsTemplate;
@@ -16,8 +15,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -32,6 +33,7 @@ public class TrainingServiceImpl implements TrainingService {
     private JmsTemplate jmsTemplate;
     private String activationDestination;
     private MessageHelper messageHelper;
+    private EmailMessageDto emailMessage;
     public TrainingServiceImpl(TrainingRepository trainingRepository,TrainingMapper trainingMapper, JmsTemplate jmsTemplate,
                                @Value("${destination.createActivation}") String activationDestination, MessageHelper messageHelper){
         this.trainingRepository = trainingRepository;
@@ -45,7 +47,7 @@ public class TrainingServiceImpl implements TrainingService {
     public Training add(TrainingDto trainingDto) {
         Training training = trainingMapper.trainingDtoToTraining(trainingDto);
         trainingRepository.save(training);
-        createEmailMessage(trainingDto);
+        createEmailMessage(trainingDto, 0);
         return training;
     }
 
@@ -79,15 +81,23 @@ public class TrainingServiceImpl implements TrainingService {
         return trainingRepository.save(training);
     }
 
-//    @Override
-//    public ClientDto update(ClientUpdateDto clientUpdateDto) {
-//        Client client = clientRepository.findByUserUsername(clientUpdateDto.getOldUsername()).orElseThrow(()->new RuntimeException());
-//        client = clientMapper.clientUpdateToClient(client,clientUpdateDto);
-//        client = clientRepository.save(client);
-//        return clientMapper.clientToClientDto(client);
-//    }
 
-    private void createEmailMessage(TrainingDto trainingDto) {
+    @Override
+    public boolean deleteTraining(LocalDate date, String startTime, Long userId) {
+        Optional<Training> trainingOptional = trainingRepository.findByDateAndStartTimeAndUserId(date, startTime, userId);
+        if (trainingOptional.isPresent()) {
+            trainingRepository.delete(trainingOptional.get());
+            // email
+            createEmailMessage(trainingMapper.trainingToTrainingDto(trainingOptional.get()), 1);
+            return true; // Successfully deleted
+        } else {
+            return false; // Training not found
+        }
+    }
+
+
+
+    private void createEmailMessage(TrainingDto trainingDto, int flag) {
 
         restTemplateServiceImpl = new RestTemplateServiceImpl();
         trainingRestTemplate = restTemplateServiceImpl.setupRestTemplate(trainingRestTemplate);
@@ -107,18 +117,30 @@ public class TrainingServiceImpl implements TrainingService {
 
 
 
+
         Map<String, String> params = new HashMap<>();
         params.put("ime", client.getUser().getFirstName());
         params.put("prezime", client.getUser().getLastName());
         params.put("clientId", userId.toString());
-        EmailMessageDto emailMessage = new EmailMessageDto(
-                client.getUser().getEmail(),
-                "Reservation Email",
-                "Pozdrav," + params.get("ime") + " " + params.get("prezime") +
-                "Vas trening je uspesno zakazan za " + trainingDto.getDate() + " u " + trainingDto.getStartTime() + "h",
-                "RESERVATION",
-                params
-        );
+        if (flag == 0){
+            emailMessage = new EmailMessageDto(
+                    client.getUser().getEmail(),
+                    "Reservation Email",
+                    "Pozdrav, " + params.get("ime") + " " + params.get("prezime") +
+                    " Vas trening je uspesno zakazan za " + trainingDto.getDate() + " u " + trainingDto.getStartTime() + "h",
+                    "RESERVATION",
+                    params
+            );
+        }else{
+            emailMessage = new EmailMessageDto(
+                    client.getUser().getEmail(),
+                    "Cancellation Email",
+                    "Pozdrav, " + params.get("ime") + " " + params.get("prezime") +
+                            " Vas trening je uspesno otkazan za " + trainingDto.getDate() + " u " + trainingDto.getStartTime() + "h",
+                    "CANCELATION",
+                    params
+            );
+        }
         jmsTemplate.convertAndSend(activationDestination, messageHelper.createTextMessage(emailMessage));
     }
 }

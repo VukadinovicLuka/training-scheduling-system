@@ -1,8 +1,8 @@
 package nikolalukatrening.Notifikacioni_servis.listener;
 
-import nikolalukatrening.Notifikacioni_servis.dto.ClientProfileEditorDto;
-import nikolalukatrening.Notifikacioni_servis.dto.EmailMessageDto;
-import nikolalukatrening.Notifikacioni_servis.dto.TrainingDto;
+import nikolalukatrening.Notifikacioni_servis.config.dto.ClientProfileEditorDto;
+import nikolalukatrening.Notifikacioni_servis.config.dto.EmailMessageDto;
+import nikolalukatrening.Notifikacioni_servis.config.dto.TrainingDto;
 import nikolalukatrening.Notifikacioni_servis.service.impl.RestTemplateServiceImpl;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
