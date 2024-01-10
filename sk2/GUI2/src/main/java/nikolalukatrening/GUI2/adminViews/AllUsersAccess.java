@@ -3,6 +3,7 @@ package nikolalukatrening.GUI2.adminViews;
 
 import nikolalukatrening.GUI2.customTable.CustomTable;
 import nikolalukatrening.GUI2.dto.ClientProfileEditorDto;
+import nikolalukatrening.GUI2.dto.ManagerDto;
 import nikolalukatrening.GUI2.service.impl.AdminServiceImpl;
 import nikolalukatrening.GUI2.service.impl.RestTemplateServiceImpl;
 import org.springframework.core.ParameterizedTypeReference;
@@ -21,11 +22,13 @@ public class AllUsersAccess extends JPanel {
     private JPanel clientsPanel;
     private JPanel managersPanel;
     private CustomTable clientsTable;
-    private JTable managersTable;
+    private CustomTable managersTable;
     private RestTemplate adminServiceRestTemplate;
     private RestTemplate activationServiceRestTemplate;
     private RestTemplate deActivationServiceRestTemplate;
+    private RestTemplate managerRestTemplate;
     private AdminServiceImpl adminService;
+
     private RestTemplateServiceImpl restTemplateService;
 
     private Frame parentFrame;
@@ -117,18 +120,45 @@ public class AllUsersAccess extends JPanel {
         clientsTable = new CustomTable(clientsModel);
         JScrollPane scrollPane = new JScrollPane(clientsTable);
         clientsPanel.add(scrollPane, BorderLayout.CENTER);
+
     }
 
     private void setupManagersPanel() {
         String[] managerColumns = new String[]{"id", "username", "email", "firstName", "lastName", "dateOfHiring", "gymName"};
-        Object[][] managerData = {
-                {"1", "menadzer1", "menadzer1@email.com", "ImeM1", "PrezimeM1", "01-01-2010", "Teretana1"},
-                {"2", "menadzer2", "menadzer2@email.com", "ImeM2", "PrezimeM2", "02-02-2011", "Teretana2"},
-                {"3", "menadzer3", "menadzer3@email.com", "ImeM3", "PrezimeM3", "03-03-2012", "Teretana3"}
-        };
-        DefaultTableModel managersModel = new DefaultTableModel(managerData, managerColumns);
-        managersTable = new JTable(managersModel);
-        managersPanel.add(new JScrollPane(managersTable), BorderLayout.CENTER);
+
+
+        managerRestTemplate = restTemplateService.setupRestTemplate(managerRestTemplate);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> entity = new HttpEntity<>("parameters",headers);
+
+        ResponseEntity<List<ManagerDto>> response = managerRestTemplate.exchange(
+                "http://localhost:8080/api/manager/all",
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<List<ManagerDto>>() {});
+        List<ManagerDto> managers = response.getBody();
+
+        // Create a data model for the table
+        DefaultTableModel managersModel = new DefaultTableModel(managerColumns, 0);
+
+        // Populate the model with client data
+        for (ManagerDto manager : managers) {
+            Object[] row = new Object[]{
+                    manager.getId(),
+                    manager.getUser().getUsername(),
+                    manager.getUser().getEmail(),
+                    manager.getUser().getFirstName(),
+                    manager.getUser().getLastName(),
+                    manager.getDateOfHiring(),
+                    manager.getGymName()
+            };
+            managersModel.addRow(row);
+        }
+        managersTable = new CustomTable(managersModel);
+        JScrollPane scrollPane = new JScrollPane(managersTable);
+        managersPanel.add(scrollPane, BorderLayout.CENTER);
     }
 
 }

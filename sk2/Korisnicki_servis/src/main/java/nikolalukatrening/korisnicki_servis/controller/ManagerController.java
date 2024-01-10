@@ -5,14 +5,13 @@ import nikolalukatrening.korisnicki_servis.dto.ClientCreateDto;
 import nikolalukatrening.korisnicki_servis.dto.ClientDto;
 import nikolalukatrening.korisnicki_servis.dto.ManagerCreateDto;
 import nikolalukatrening.korisnicki_servis.dto.ManagerDto;
+import nikolalukatrening.korisnicki_servis.model.Manager;
+import nikolalukatrening.korisnicki_servis.repository.ManagerRepository;
 import nikolalukatrening.korisnicki_servis.service.ClientService;
 import nikolalukatrening.korisnicki_servis.service.ManagerService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,10 +21,12 @@ import java.util.stream.Collectors;
 public class ManagerController {
 
     private ManagerService managerService;
+    private ManagerRepository managerRepository;
 
 
-    public ManagerController(ManagerService managerService) {
+    public ManagerController(ManagerService managerService, ManagerRepository managerRepository) {
         this.managerService = managerService;
+        this.managerRepository = managerRepository;
     }
 
     // klijenti imaju zasebne rute za registraciju
@@ -41,5 +42,10 @@ public class ManagerController {
                 .map(managerCreateDto -> managerService.add(managerCreateDto))
                 .collect(Collectors.toList());
         return new ResponseEntity<>(savedManagers, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<List<Manager>> getAllManagers() {
+        return new ResponseEntity<>(managerService.getAllManagers(), HttpStatus.OK);
     }
 }

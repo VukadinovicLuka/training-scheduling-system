@@ -14,6 +14,8 @@ import nikolalukatrening.korisnicki_servis.service.ManagerService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @Transactional
 public class ManagerServiceImpl implements ManagerService {
@@ -32,5 +34,10 @@ public class ManagerServiceImpl implements ManagerService {
         Manager manager = managerMapper.managerCreateDtoToManager(managerCreateDto);
         managerRepository.save(manager);
         return managerMapper.managerToManagerDto(manager);
+    }
+
+    @Override
+    public List<Manager> getAllManagers() {
+        return managerRepository.findAll();
     }
 }
