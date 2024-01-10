@@ -15,6 +15,7 @@ import java.awt.*;
 import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class ClientsTrainings extends JPanel {
@@ -156,24 +157,20 @@ public class ClientsTrainings extends JPanel {
     private String getGymName(Integer gymId) {
         gymNameTemplate = restTemplateService.setupRestTemplate(gymNameTemplate);
         String gymName = null;
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
-        System.out.println("Gym id : " + gymId);
         try {
-            ResponseEntity<String> response = gymNameTemplate.exchange(
+            ResponseEntity<Map<String, String>> response = gymNameTemplate.exchange(
                     "http://localhost:8082/api/gym/" + gymId,
                     HttpMethod.GET,
                     null,
-                    String.class);
+                    new ParameterizedTypeReference<Map<String, String>>() {});
 
             // Check if response is good
-            if (response.getStatusCode() != HttpStatus.OK) {
-                System.out.println("Error!");
-                return null;
+            if (response.getStatusCode() == HttpStatus.OK) {
+                gymName = response.getBody().get("name");
+                System.out.println("Retrieved gym name: " + gymName);
+            } else {
+                System.out.println("Error retrieving gym name!");
             }
-            System.out.println("VRACAM : "  + response.getBody());
-            gymName = response.getBody();
         } catch (Exception e) {
             e.printStackTrace();
         }

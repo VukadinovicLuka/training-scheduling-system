@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -41,11 +43,12 @@ public class GymController {
 
     // saljem gymId zelim da dobijem gymName
     @GetMapping("/{gymId}")
-    public ResponseEntity<String> getGymNameById(@PathVariable Long gymId) {
+    public ResponseEntity<Map<String, String>> getGymNameById(@PathVariable Long gymId) {
         Gym gym = gymRepository.findById(gymId).get();
         String gymName = gym.getName();
-        System.out.println("gymName: " + gymName);
-        return ResponseEntity.ok(gymName);
+        Map<String, String> response = new HashMap<>();
+        response.put("name", gymName);
+        return ResponseEntity.ok(response);
     }
 
 }
