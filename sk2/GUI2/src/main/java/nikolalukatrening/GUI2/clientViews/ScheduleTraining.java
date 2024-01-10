@@ -255,16 +255,21 @@ public class ScheduleTraining extends JPanel {
             Set<TrainingDto> treninzi = fetchAllTrainings();
             int flag = 0;
             for(TrainingDto trainingDto1: treninzi){
-//                System.out.println("TrainingDto1: " + trainingDto1);
                 String time = (String) cbTime.getSelectedItem();
                 String[] prvo = time.split("-");
                 Date date = (Date) datePicker.getModel().getValue();
                 LocalDate localDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-                if(trainingDto1.getDate().equals(localDate) && trainingDto1.getStartTime().equals(prvo[0])){
-                    trainingDto1.setMaxParticipants(trainingDto1.getMaxParticipants()+1);
-                    updateParticipantsTraining(trainingDto1);
-                    trainingDto.setMaxParticipants(trainingDto1.getMaxParticipants());
-                    flag = 1;
+                Integer gymId = cbGym.getSelectedIndex() + 1;
+                if(trainingDto1.getDate().equals(localDate) && trainingDto1.getStartTime().equals(prvo[0]) && trainingDto1.getGymId()==gymId){
+                    if(trainingDto1.getMaxParticipants()==2){
+                        JOptionPane.showMessageDialog(null, "Popunjen kapacitet za odabrani trening");
+                        return;
+                    } else {
+                        trainingDto1.setMaxParticipants(trainingDto1.getMaxParticipants() + 1);
+                        updateParticipantsTraining(trainingDto1);
+                        trainingDto.setMaxParticipants(trainingDto1.getMaxParticipants());
+                        flag = 1;
+                    }
                 }
             }
             if(flag==0){
