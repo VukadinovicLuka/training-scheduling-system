@@ -326,6 +326,9 @@ public class ScheduleTraining extends JPanel {
         clientToUpdate.setId(Long.valueOf(userId));
         clientToUpdate.setActivationToken(client.getActivationToken());
         clientToUpdate.setIsActivated(client.getIsActivated());
+        if(trening!=0 && trening%12==0){
+            JOptionPane.showMessageDialog(null, "Trening je besplatan jer je 12ti");
+        }
 
         RequestEntity<ClientProfileEditorDto> requestEntity1 = RequestEntity.put(URI.create("http://localhost:8080/api/client/" + userId)).headers(headers).body(clientToUpdate);
 
@@ -355,7 +358,6 @@ public class ScheduleTraining extends JPanel {
         return training;
     }
 
-
     private void fetchUnavailableTimes(LocalDate date) {
         // This is just an example, you need to replace it with your actual REST call logic
         String url = "http://localhost:8082/api/training/start-times?date=" + date;
@@ -374,7 +376,11 @@ public class ScheduleTraining extends JPanel {
     private void updatePrice() {
         String selectedTrainingSort = cbTrainingType.getSelectedItem().toString();
         String selectedTrainingType = cbTrainingOptions.getSelectedItem().toString();
-        int price = getPriceFromDatabase(selectedTrainingSort, selectedTrainingType);
+        ProfileEditor profileEditor = new ProfileEditor();
+        System.out.println(profileEditor.getReservedTrainingsField().getText());
+
+        Integer price = getPriceFromDatabase(selectedTrainingSort, selectedTrainingType);
+
         System.out.println("Price: " + price);
         lblPrice.setText("Cena: " + price + "RSD");
     }
@@ -398,7 +404,6 @@ public class ScheduleTraining extends JPanel {
             e.printStackTrace();
 
         }
-
         return price;
     }
 

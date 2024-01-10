@@ -93,7 +93,6 @@ public class ClientController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-
     @PostMapping("/login/token")
     public ResponseEntity<ClaimResponseDto> getClaimsFromToken(@RequestBody TokenResponseDto tokenResponseDto) {
         return new ResponseEntity<>(clientService.getClaim(tokenResponseDto), HttpStatus.OK);

@@ -14,5 +14,4 @@ public class Gui2Application {
 		LoginFrame.setLocationRelativeTo(null);
 		SpringApplication.run(Gui2Application.class, args);
 	}
-
 }

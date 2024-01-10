@@ -209,6 +209,7 @@ public class ClientsTrainings extends JPanel {
 
         return price;
     }
+
     public void loadTrainings(Integer id) {
         trainingsRestTemplate = restTemplateService.setupRestTemplate(trainingsRestTemplate);
 
@@ -226,13 +227,21 @@ public class ClientsTrainings extends JPanel {
                     new ParameterizedTypeReference<List<TrainingDto>>() {});
 
             List<TrainingDto> trainingsForClient = trainingResponse.getBody();
+            int i = 1;
             if (trainingsForClient != null) {
                 for (TrainingDto trainingDto : trainingsForClient) {
                     if(trainingDto.getIsAvailable()) {
+                        Integer price = 0;
+                        if(i%12==0){
+                            price = 0;
+                        } else {
+                            price = updatePrice(trainingDto.getIsGroupTraining(), trainingDto.getTrainingType());
+                        }
                         tableModel.addRow(new Object[]{trainingDto.getDate(), trainingDto.getIsGroupTraining(), trainingDto.getMaxParticipants(),
                                 trainingDto.getStartTime(), trainingDto.getTrainingType(),
-                                trainingDto.getUserId(), updatePrice(trainingDto.getIsGroupTraining(), trainingDto.getTrainingType()), getGymName(trainingDto.getGymId())});
+                                trainingDto.getUserId(),price, getGymName(trainingDto.getGymId())});
                     }
+                    i++;
                 }
             } else {
                 showNoTrainingsMessage();

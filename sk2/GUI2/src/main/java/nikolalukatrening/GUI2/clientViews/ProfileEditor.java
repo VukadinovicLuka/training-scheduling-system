@@ -100,8 +100,6 @@ public class ProfileEditor extends JPanel {
         add(btnConfirm, gbc);
     }
 
-
-
     public void loadProfileData(Integer id) {
         System.out.println("usao");
         this.id = id;

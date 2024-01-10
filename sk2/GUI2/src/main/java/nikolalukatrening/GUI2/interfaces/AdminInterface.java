@@ -72,5 +72,4 @@ public class AdminInterface extends JFrame {
         }
         cardLayout.show(cardPanel, e.getActionCommand());
     }
-
 }
