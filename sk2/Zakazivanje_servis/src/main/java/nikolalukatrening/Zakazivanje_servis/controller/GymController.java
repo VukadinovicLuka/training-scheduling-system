@@ -9,10 +9,7 @@ import nikolalukatrening.Zakazivanje_servis.repository.TrainingTypesRepository;
 import nikolalukatrening.Zakazivanje_servis.service.GymService;
 import nikolalukatrening.Zakazivanje_servis.service.TrainingService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -53,6 +50,17 @@ public class GymController {
     public ResponseEntity<Gym> getGymByGymName(@PathVariable String gymName) {
         Optional<Gym> gym =  gymRepository.findByName(gymName);
         return ResponseEntity.ok(gym.get());
+    }
+
+    // na osnovu gymName zelim da pronadjem gym i update-ujem mu description i broj personalnih trenera
+    @PutMapping("/update/{gymName}")
+    public ResponseEntity<Gym> updateGym(@PathVariable String gymName, @RequestBody Gym gym) {
+        Optional<Gym> gymToUpdate = gymRepository.findByName(gymName);
+        gymToUpdate.get().setName(gym.getName());
+        gymToUpdate.get().setDescription(gym.getDescription());
+        gymToUpdate.get().setPersonalTrainerNumbers(gym.getPersonalTrainerNumbers());
+        gymRepository.save(gymToUpdate.get());
+        return ResponseEntity.ok(gymToUpdate.get());
     }
 
 }

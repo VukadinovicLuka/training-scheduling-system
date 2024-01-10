@@ -64,5 +64,37 @@ public class TestDataRunner implements CommandLineRunner {
         manager.setUser(user2); // Setujemo ugnježdenog korisnika
         managerRepository.save(manager);
 
+        // manager 2
+        User user3 = new User();
+        user3.setUsername("manager2");
+        user3.setPassword("manager2"); // Šifra treba da bude enkriptovana
+        user3.setEmail("manager2@gmail.com");
+        user3.setFirstName("Nikola");
+        user3.setLastName("Nikolic");
+        user3.setDateOfBirth("1970-01-01");
+        user3.setRole("ROLE_MANAGER");
+        Manager manager2 = new Manager();
+        manager2.setDateOfHiring("2020-01-01");
+        manager2.setGymName("Gym2");
+        manager2.setUser(user3); // Setujemo ugnježdenog korisnika
+        managerRepository.save(manager2);
+
+        // manager 3
+        User user4 = new User();
+        user4.setUsername("manager3");
+        user4.setPassword("manager3"); // Šifra treba da bude enkriptovana
+        user4.setEmail("manager3@gmail.com");
+        user4.setFirstName("Milan");
+        user4.setLastName("Milanovic");
+        user4.setDateOfBirth("1970-01-01");
+        user4.setRole("ROLE_MANAGER");
+        Manager manager3 = new Manager();
+        manager3.setDateOfHiring("2020-01-01");
+        manager3.setGymName("Gym3");
+        manager3.setUser(user4); // Setujemo ugnježdenog korisnika
+        managerRepository.save(manager3);
+
+
+
     }
 }

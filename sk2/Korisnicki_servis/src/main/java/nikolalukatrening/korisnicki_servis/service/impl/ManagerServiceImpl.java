@@ -40,4 +40,12 @@ public class ManagerServiceImpl implements ManagerService {
     public List<Manager> getAllManagers() {
         return managerRepository.findAll();
     }
+
+    @Override
+    public ManagerDto updateManagerById(Long id, ManagerDto managerDto) {
+        Manager manager = managerRepository.findById(id).get();
+        manager.setGymName(managerDto.getGymName());
+        managerRepository.save(manager);
+        return managerMapper.managerToManagerDto(manager);
+    }
 }

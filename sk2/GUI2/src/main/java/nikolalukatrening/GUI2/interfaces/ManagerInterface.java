@@ -2,6 +2,7 @@ package nikolalukatrening.GUI2.interfaces;
 
 import nikolalukatrening.GUI2.adminViews.AllNotificationsAccess;
 import nikolalukatrening.GUI2.adminViews.AllUsersAccess;
+import nikolalukatrening.GUI2.clientViews.ClientNotifications;
 import nikolalukatrening.GUI2.managerViews.GymEditor;
 
 import javax.swing.*;
@@ -41,7 +42,7 @@ public class ManagerInterface extends JFrame {
 
         // Add buttons to toolbar
         addButtonToToolbar("Uređivanje podataka o fiskulturnoj sali", "gymEdit", "edit.png");
-
+        addButtonToToolbar("Poslate notifikacije menadzeru", "notifications", "rate.png");
         // Add toolBar and cardPanel to frame
         add(toolBar, BorderLayout.NORTH);
         add(cardPanel, BorderLayout.CENTER);
@@ -67,6 +68,11 @@ public class ManagerInterface extends JFrame {
             gymEditorView = new GymEditor();
             gymEditorView.loadManagerData(userId);
             cardPanel.add(gymEditorView, "gymEdit");
+        } else if ("notifications".equals(e.getActionCommand())){
+            // TODO: Add notifications view
+//            clientNotificationsView = new ClientNotifications();
+//            clientNotificationsView.loadNotifications(this.userId);
+//            cardPanel.add(clientNotificationsView, "notifications");
         }
         cardLayout.show(cardPanel, e.getActionCommand());
     }

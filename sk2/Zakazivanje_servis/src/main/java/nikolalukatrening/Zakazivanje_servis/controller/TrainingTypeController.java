@@ -4,10 +4,7 @@ import nikolalukatrening.Zakazivanje_servis.model.TrainingTypes;
 import nikolalukatrening.Zakazivanje_servis.repository.TrainingTypesRepository;
 import nikolalukatrening.Zakazivanje_servis.service.TrainingService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Set;
@@ -66,5 +63,14 @@ public class TrainingTypeController {
         TrainingTypes trainingTypes = trainingTypesRepository.findByTrainingType(trainingType);
         Integer price = trainingTypes.getTrainingTypePrice();
         return ResponseEntity.ok(price);
+    }
+
+    // na osnovu trainingType zelim da promenim cenu
+    @PutMapping("/update/{trainingType}")
+    public ResponseEntity<TrainingTypes> updateTrainingType(@PathVariable String trainingType, @RequestBody TrainingTypes trainingTypes) {
+        TrainingTypes trainingTypeToUpdate = trainingTypesRepository.findByTrainingType(trainingType);
+        trainingTypeToUpdate.setTrainingTypePrice(trainingTypes.getTrainingTypePrice());
+        trainingTypesRepository.save(trainingTypeToUpdate);
+        return ResponseEntity.ok(trainingTypeToUpdate);
     }
 }

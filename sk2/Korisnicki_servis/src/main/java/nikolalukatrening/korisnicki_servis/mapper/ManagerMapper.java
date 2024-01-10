@@ -22,6 +22,7 @@ public class ManagerMapper {
         managerDto.setLastName(manager.getUser().getLastName());
         managerDto.setDateOfBirth(manager.getUser().getDateOfBirth());
         managerDto.setGymName(manager.getGymName());
+        managerDto.setDateOfHiring(manager.getDateOfHiring());
 
         return managerDto;
     }

@@ -1,10 +1,7 @@
 package nikolalukatrening.korisnicki_servis.controller;
 
 import jakarta.validation.Valid;
-import nikolalukatrening.korisnicki_servis.dto.ClientCreateDto;
-import nikolalukatrening.korisnicki_servis.dto.ClientDto;
-import nikolalukatrening.korisnicki_servis.dto.ManagerCreateDto;
-import nikolalukatrening.korisnicki_servis.dto.ManagerDto;
+import nikolalukatrening.korisnicki_servis.dto.*;
 import nikolalukatrening.korisnicki_servis.model.Client;
 import nikolalukatrening.korisnicki_servis.model.Manager;
 import nikolalukatrening.korisnicki_servis.repository.ManagerRepository;
@@ -59,4 +56,18 @@ public class ManagerController {
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
+
+    @PutMapping("/update/{id}")
+    public ResponseEntity<ManagerDto> updateManagerGymName(@PathVariable Long id, @RequestBody  ManagerDto managerDto){
+        return new ResponseEntity<>(managerService.updateManagerById(id, managerDto), HttpStatus.OK);
+    }
+
+
+//    @PutMapping("/{id}")
+//    public ResponseEntity<ClientAdminDto> updateClientById(@PathVariable Long id, @RequestBody @Valid ClientAdminDto clientAdminDto){
+//        return new ResponseEntity<>(clientService.updateClientById(id, clientAdminDto), HttpStatus.OK);
+//    }
+
+
+
 }

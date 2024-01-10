@@ -22,7 +22,7 @@ public class AllUsersAccess extends JPanel {
     private JPanel clientsPanel;
     private JPanel managersPanel;
     private CustomTable clientsTable;
-    private CustomTable managersTable;
+    private JTable managersTable;
     private RestTemplate adminServiceRestTemplate;
     private RestTemplate activationServiceRestTemplate;
     private RestTemplate deActivationServiceRestTemplate;
@@ -156,7 +156,7 @@ public class AllUsersAccess extends JPanel {
             };
             managersModel.addRow(row);
         }
-        managersTable = new CustomTable(managersModel);
+        managersTable = new JTable(managersModel);
         JScrollPane scrollPane = new JScrollPane(managersTable);
         managersPanel.add(scrollPane, BorderLayout.CENTER);
     }
