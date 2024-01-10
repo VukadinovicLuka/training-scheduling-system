@@ -131,17 +131,20 @@ public class TestDataRunner implements CommandLineRunner {
         Gym gym1 = new Gym();
         gym1.setName("Gym1");
         gym1.setDescription("Gym1 description");
+        gym1.setPersonalTrainerNumbers(4);
         gymRepository.save(gym1);
 
 
         Gym gym2 = new Gym();
         gym2.setName("Gym2");
         gym2.setDescription("Gym2 description");
+        gym2.setPersonalTrainerNumbers(5);
         gymRepository.save(gym2);
 
         Gym gym3 = new Gym();
         gym3.setName("Gym3");
         gym3.setDescription("Gym3 description");
+        gym3.setPersonalTrainerNumbers(6);
         gymRepository.save(gym3);
     }
 }

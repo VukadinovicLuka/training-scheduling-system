@@ -2,6 +2,7 @@ package nikolalukatrening.Zakazivanje_servis.controller;
 
 
 import nikolalukatrening.Zakazivanje_servis.model.Gym;
+import nikolalukatrening.Zakazivanje_servis.model.Training;
 import nikolalukatrening.Zakazivanje_servis.model.TrainingTypes;
 import nikolalukatrening.Zakazivanje_servis.repository.GymRepository;
 import nikolalukatrening.Zakazivanje_servis.repository.TrainingTypesRepository;
@@ -13,10 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -49,6 +47,12 @@ public class GymController {
         Map<String, String> response = new HashMap<>();
         response.put("name", gymName);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/name/{gymName}")
+    public ResponseEntity<Gym> getGymByGymName(@PathVariable String gymName) {
+        Optional<Gym> gym =  gymRepository.findByName(gymName);
+        return ResponseEntity.ok(gym.get());
     }
 
 }

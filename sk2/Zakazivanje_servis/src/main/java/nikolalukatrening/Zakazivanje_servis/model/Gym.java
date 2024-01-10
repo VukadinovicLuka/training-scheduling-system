@@ -16,4 +16,15 @@ public class Gym {
     private Long id;
     private String name;
     private String description;
+    private Integer personalTrainerNumbers;
+
+    @Override
+    public String toString() {
+        return "Gym{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", personalTrainerNumbers=" + personalTrainerNumbers +
+                '}';
+    }
 }

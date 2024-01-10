@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -32,6 +33,14 @@ public class TrainingTypeController {
                 .collect(Collectors.toSet());
         return ResponseEntity.ok(trainingTypes);
     }
+    @GetMapping("/allTypes")
+    public ResponseEntity<List<String>> getAllTypes() {
+        List<String> trainingTypes = trainingTypesRepository.findAll()
+                .stream()
+                .map(TrainingTypes::getTrainingType) // Assuming you have a getName method
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(trainingTypes);
+    }
     
     @GetMapping("/by-category/{category}")
     public ResponseEntity<Set<String>> getTrainingTypesByCategory(@PathVariable String category) {
@@ -48,7 +57,14 @@ public class TrainingTypeController {
     public ResponseEntity<Integer> getPriceByTrainingSortAndTrainingyTType(@PathVariable String trainingSort, @PathVariable String trainingType) {
         TrainingTypes trainingTypes = trainingTypesRepository.findByTrainingSortAndTrainingType(trainingSort, trainingType);
         Integer price = trainingTypes.getTrainingTypePrice();
-        System.out.println("price: " + price);
+        return ResponseEntity.ok(price);
+    }
+
+    // zelim da na osnovu trainingType dobijem price
+    @GetMapping("/price/{trainingType}")
+    public ResponseEntity<Integer> getPriceByTrainingyTType(@PathVariable String trainingType) {
+        TrainingTypes trainingTypes = trainingTypesRepository.findByTrainingType(trainingType);
+        Integer price = trainingTypes.getTrainingTypePrice();
         return ResponseEntity.ok(price);
     }
 }

@@ -13,4 +13,6 @@ public interface TrainingTypesRepository extends JpaRepository<TrainingTypes,Lon
     List<TrainingTypes> findByTrainingSort(String trainingType);
 
     TrainingTypes findByTrainingSortAndTrainingType(String trainingSort, String trainingType);
+
+    TrainingTypes findByTrainingType(String trainingType);
 }

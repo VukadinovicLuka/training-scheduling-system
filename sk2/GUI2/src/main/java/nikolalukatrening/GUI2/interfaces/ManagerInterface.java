@@ -14,9 +14,11 @@ public class ManagerInterface extends JFrame {
     private JPanel cardPanel;
     private JToolBar toolBar;
     private GymEditor gymEditorView;
+    private Integer userId;
 
-    public ManagerInterface() {
+    public ManagerInterface(Integer userId) {
         // Save the user ID
+        this.userId = userId;
         setTitle("Manager Interfejs");
         setSize(800, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -32,6 +34,7 @@ public class ManagerInterface extends JFrame {
         // Initialize other views
 
         gymEditorView = new GymEditor();
+        gymEditorView.loadManagerData(userId);
 
         // Add other views to cardPanel
         cardPanel.add(gymEditorView, "gymEdit");
@@ -60,8 +63,9 @@ public class ManagerInterface extends JFrame {
     }
 
     private void toolbarButtonClicked(ActionEvent e) {
-        if ("gymEdit".equals(e.getActionCommand()) && gymEditorView == null) {
+        if ("gymEdit".equals(e.getActionCommand())) {
             gymEditorView = new GymEditor();
+            gymEditorView.loadManagerData(userId);
             cardPanel.add(gymEditorView, "gymEdit");
         }
         cardLayout.show(cardPanel, e.getActionCommand());

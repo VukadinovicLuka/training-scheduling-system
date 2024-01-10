@@ -199,7 +199,8 @@ public class Login extends JFrame {
                      clientInterface.setVisible(true);
                      this.dispose();
                 } else if(claims.getRole().equals("ROLE_MANAGER")){
-                    ManagerInterface managerFrame = new ManagerInterface();
+                    Integer userId = claims.getId();
+                    ManagerInterface managerFrame = new ManagerInterface(userId);
                     managerFrame.setVisible(true);
                     this.dispose();
                 } else {

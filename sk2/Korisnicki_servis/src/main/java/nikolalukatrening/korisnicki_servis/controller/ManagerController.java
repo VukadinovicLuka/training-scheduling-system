@@ -5,6 +5,7 @@ import nikolalukatrening.korisnicki_servis.dto.ClientCreateDto;
 import nikolalukatrening.korisnicki_servis.dto.ClientDto;
 import nikolalukatrening.korisnicki_servis.dto.ManagerCreateDto;
 import nikolalukatrening.korisnicki_servis.dto.ManagerDto;
+import nikolalukatrening.korisnicki_servis.model.Client;
 import nikolalukatrening.korisnicki_servis.model.Manager;
 import nikolalukatrening.korisnicki_servis.repository.ManagerRepository;
 import nikolalukatrening.korisnicki_servis.service.ClientService;
@@ -14,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -47,5 +49,14 @@ public class ManagerController {
     @GetMapping("/all")
     public ResponseEntity<List<Manager>> getAllManagers() {
         return new ResponseEntity<>(managerService.getAllManagers(), HttpStatus.OK);
+    }
+
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getManagerById(@PathVariable Long id) {
+        Optional<Manager> managerOptional = managerRepository.findById(id);
+        return managerOptional
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }
