@@ -29,12 +29,13 @@ import org.springframework.web.client.RestTemplate;
 @Getter
 @Setter
 public class ScheduleTraining extends JPanel {
-        private JLabel lblTrainingType, lblDayOfWeek, lblTrainingOptions, lblTime;
-        private JComboBox<String> cbTrainingType, cbTrainingOptions, cbTime;
+        private JLabel lblTrainingType, lblDayOfWeek, lblTrainingOptions, lblTime, lblGym;
+        private JComboBox<String> cbTrainingType, cbTrainingOptions, cbTime, cbGym;
         private JButton btnBook;
         private Font labelFont = new Font("Arial", Font.BOLD, 16);
         private Font comboFont = new Font("Arial", Font.PLAIN, 16);
         private Font buttonFont = new Font("Arial", Font.BOLD, 16);
+        private JLabel lblPrice;
         private JDatePicker datePicker;
         private RestTemplate timeRestTemplate;
         private RestTemplateServiceImpl restTemplateServiceImpl;
@@ -42,6 +43,8 @@ public class ScheduleTraining extends JPanel {
         private RestTemplate partcipantsTemplate;
         private RestTemplate updateTrainingTemplate;
         private RestTemplate updateComboBoxTemplate;
+        private RestTemplate priceTemplate;
+        private RestTemplate gymTemplate;
         private Integer userId;
         private ClientProfileEditorDto client;
         private ProfileEditor profileEditor;
@@ -65,6 +68,10 @@ public class ScheduleTraining extends JPanel {
             gbc.anchor = GridBagConstraints.CENTER; // Centriranje naslova u prostoru
             add(lblTitle, gbc);
 
+            //gym
+            lblGym = createLabel("Odaberite teretanu: ");
+            cbGym = new JComboBox<>();
+            fetchAndPopulateGyms();// fetch za teretane
             lblTrainingType = createLabel("Odaberite vrstu treninga:");
             cbTrainingType = new JComboBox<>();
             fetchAndPopulateTrainingTypes();// ovde treba da se fetch za ova dva
@@ -97,43 +104,56 @@ public class ScheduleTraining extends JPanel {
             }
 
             cbTime = createComboBox(timeSlots.toArray(new String[0]));
+            // price
+            lblPrice = createLabel("Cena: ");
             btnBook = createButton("Zakaži");
             btnBook.addActionListener(e-> zakazivanje());
 
             // Postavljanje komponenti na panelu koristeći GridBagLayout
             gbc.gridwidth = 1;
 
-            // Odabir vrste treninga
+            // Odabir gyma
             gbc.gridx = 0;
             gbc.gridy = 1;
+            add(lblGym, gbc);
+            gbc.gridx = 1;
+            add(cbGym, gbc);
+
+            // Odabir vrste treninga
+            gbc.gridx = 0;
+            gbc.gridy = 2;
             add(lblTrainingType, gbc);
             gbc.gridx = 1;
             add(cbTrainingType, gbc);
 
             // Odabir dana u nedelji
             gbc.gridx = 0;
-            gbc.gridy = 2;
+            gbc.gridy = 3;
             add(lblDayOfWeek, gbc);
             gbc.gridx = 1;
             add((Component) datePicker, gbc);
 
             // Tip treninga
             gbc.gridx = 0;
-            gbc.gridy = 3;
+            gbc.gridy = 4;
             add(lblTrainingOptions, gbc);
             gbc.gridx = 1;
             add(cbTrainingOptions, gbc);
 
             // Vreme
             gbc.gridx = 0;
-            gbc.gridy = 4;
+            gbc.gridy = 5;
             add(lblTime, gbc);
             gbc.gridx = 1;
             add(cbTime, gbc);
 
+            // Cena
+            gbc.gridx = 0;
+            gbc.gridy = 6;
+            add(lblPrice, gbc);
             // Dugme za zakazivanje
             gbc.gridx = 0;
-            gbc.gridy = 5;
+            gbc.gridy = 7;
             gbc.gridwidth = 2; // Dugme se prostire preko dva stupca
             gbc.fill = GridBagConstraints.HORIZONTAL;
             add(btnBook, gbc);
@@ -145,6 +165,17 @@ public class ScheduleTraining extends JPanel {
                     // Proveravamo da li je događaj za selekciju
                     if (e.getStateChange() == ItemEvent.SELECTED) {
                         updateTrainingOptions();
+                        updatePrice();
+                    }
+                }
+            });
+
+            cbTrainingOptions.addItemListener(new ItemListener() {
+                @Override
+                public void itemStateChanged(ItemEvent e) {
+                    // Proveravamo da li je događaj za selekciju
+                    if (e.getStateChange() == ItemEvent.SELECTED) {
+                        updatePrice();
                     }
                 }
             });
@@ -188,6 +219,30 @@ public class ScheduleTraining extends JPanel {
         }
     }
 
+    public void fetchAndPopulateGyms(){
+        gymTemplate = restTemplateServiceImpl.setupRestTemplate(gymTemplate);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
+
+        String url = "http://localhost:8082/api/gym/all";
+
+        try {
+            ResponseEntity<Set<String>> response = gymTemplate.exchange(
+                    url, HttpMethod.GET, entity, new ParameterizedTypeReference<Set<String>>() {});
+
+            Set<String> gyms = response.getBody();
+            if (gyms != null) {
+                for (String gym : gyms) {
+                    cbGym.addItem(gym);
+                }
+            }
+        } catch (Exception e) {
+            // Handle exceptions
+            e.printStackTrace();
+        }
+    }
+
     private void zakazivanje() {
         if (cbTrainingType.getSelectedItem() == null || datePicker.getModel().getValue() == null || cbTrainingOptions.getSelectedItem() == null || cbTime.getSelectedItem() == null) {
             JOptionPane.showMessageDialog(null, "Morate odabrati sve podatke!");
@@ -205,13 +260,6 @@ public class ScheduleTraining extends JPanel {
                 String[] prvo = time.split("-");
                 Date date = (Date) datePicker.getModel().getValue();
                 LocalDate localDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-//                System.out.println("---------------------");
-//                System.out.println("LocalDate: " + localDate );
-//                System.out.println("TrainingDto1Date: " + trainingDto1.getDate());
-//                System.out.println("Prvo: " + prvo);
-//                System.out.println("Startime treninga: " + trainingDto1.getStartTime());
-//                System.out.println("---------------------");
-
                 if(trainingDto1.getDate().equals(localDate) && trainingDto1.getStartTime().equals(prvo[0])){
                     trainingDto1.setMaxParticipants(trainingDto1.getMaxParticipants()+1);
                     updateParticipantsTraining(trainingDto1);
@@ -235,7 +283,8 @@ public class ScheduleTraining extends JPanel {
         // Now you can use localDate in your DTO
 
         trainingDto.setDate(localDate);
-        trainingDto.setGymId(null);
+        trainingDto.setGymId(cbGym.getSelectedIndex() + 1);
+        System.out.println("Gym id: " + trainingDto.getGymId());
         trainingDto.setIsAvailable(true);
 
         trainingDto.setUserId(userId);
@@ -318,6 +367,39 @@ public class ScheduleTraining extends JPanel {
 
         // Now update the ComboBox
         updateComboBox(unavailableTimes);
+    }
+
+
+    // cena
+    private void updatePrice() {
+        String selectedTrainingSort = cbTrainingType.getSelectedItem().toString();
+        String selectedTrainingType = cbTrainingOptions.getSelectedItem().toString();
+        int price = getPriceFromDatabase(selectedTrainingSort, selectedTrainingType);
+        System.out.println("Price: " + price);
+        lblPrice.setText("Cena: " + price + "RSD");
+    }
+
+    private int getPriceFromDatabase(String trainingSort, String trainingType) {
+        priceTemplate = restTemplateServiceImpl.setupRestTemplate(priceTemplate);
+        Integer price = 0;
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
+
+        try {
+            ResponseEntity<Integer> response = updateComboBoxTemplate.exchange(
+                    "http://localhost:8082/api/trainingType/price/" + trainingSort + "/" + trainingType,
+                    HttpMethod.GET,
+                    entity,
+                    Integer.class);
+
+            price = response.getBody();
+        } catch (Exception e) {
+            e.printStackTrace();
+
+        }
+
+        return price;
     }
 
     private void updateComboBox(List<String> unavailableTimes) {
@@ -411,8 +493,10 @@ public class ScheduleTraining extends JPanel {
                 String selectedType = selectedItem.toString();
                 if ("Individualno".equals(selectedType)) {
                     fetchAndSetTrainingOptions("Individualno");
+//                    updatePrice();
                 } else if ("Grupno".equals(selectedType)) {
                     fetchAndSetTrainingOptions("Grupno");
+//                    updatePrice();
                 }
             }
         }

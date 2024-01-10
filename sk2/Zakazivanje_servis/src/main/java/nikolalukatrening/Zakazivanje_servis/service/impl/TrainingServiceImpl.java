@@ -61,7 +61,7 @@ public class TrainingServiceImpl implements TrainingService {
         training.setIsGroupTraining(trainingDto.getIsGroupTraining());
         training.setDate(trainingDto.getDate());
         training.setStartTime(trainingDto.getStartTime());
-        training.setGym(null);
+        training.setGymId(trainingDto.getGymId());
         training.setUserId(trainingDto.getUserId());
         training.setMaxParticipants(trainingDto.getMaxParticipants());
         training.setIsAvailable(trainingDto.getIsAvailable());
@@ -76,7 +76,7 @@ public class TrainingServiceImpl implements TrainingService {
         training.setIsGroupTraining(trainingDto.getIsGroupTraining());
         training.setDate(trainingDto.getDate());
         training.setStartTime(trainingDto.getStartTime());
-        training.setGym(null);
+        training.setGymId(trainingDto.getGymId());
         training.setUserId(trainingDto.getUserId());
         training.setMaxParticipants(trainingDto.getMaxParticipants());
         training.setIsAvailable(trainingDto.getIsAvailable());

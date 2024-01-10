@@ -4,8 +4,10 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.Date;
 
+import nikolalukatrening.Zakazivanje_servis.model.Gym;
 import nikolalukatrening.Zakazivanje_servis.model.Training;
 import nikolalukatrening.Zakazivanje_servis.model.TrainingTypes;
+import nikolalukatrening.Zakazivanje_servis.repository.GymRepository;
 import nikolalukatrening.Zakazivanje_servis.repository.TrainingRepository;
 import nikolalukatrening.Zakazivanje_servis.repository.TrainingTypesRepository;
 import org.springframework.boot.CommandLineRunner;
@@ -16,10 +18,12 @@ public class TestDataRunner implements CommandLineRunner {
 
     private TrainingRepository trainingRepository;
     private TrainingTypesRepository trainingTypesRepository;
+    private GymRepository gymRepository;
 
-    public TestDataRunner(TrainingRepository trainingRepository, TrainingTypesRepository trainingTypesRepository) {
+    public TestDataRunner(TrainingRepository trainingRepository, TrainingTypesRepository trainingTypesRepository, GymRepository gymRepository) {
         this.trainingRepository = trainingRepository;
         this.trainingTypesRepository = trainingTypesRepository;
+        this.gymRepository = gymRepository;
     }
 
     @Override
@@ -121,5 +125,23 @@ public class TestDataRunner implements CommandLineRunner {
         trainingTypes4.setTrainingTypePrice(2500);
 
         trainingTypesRepository.save(trainingTypes4);
+
+
+        // populate gym
+        Gym gym1 = new Gym();
+        gym1.setName("Gym1");
+        gym1.setDescription("Gym1 description");
+        gymRepository.save(gym1);
+
+
+        Gym gym2 = new Gym();
+        gym2.setName("Gym2");
+        gym2.setDescription("Gym2 description");
+        gymRepository.save(gym2);
+
+        Gym gym3 = new Gym();
+        gym3.setName("Gym3");
+        gym3.setDescription("Gym3 description");
+        gymRepository.save(gym3);
     }
 }

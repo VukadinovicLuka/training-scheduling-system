@@ -16,7 +16,4 @@ public class Gym {
     private Long id;
     private String name;
     private String description;
-    private Integer numberOfPersonalTrainers;
-    private String trainingType;
-    private Integer trainingTypePrice;
 }

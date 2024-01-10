@@ -13,10 +13,11 @@ public class TrainingMapper {
         training.setIsGroupTraining(trainingDto.getIsGroupTraining());
         training.setDate(trainingDto.getDate());
         training.setStartTime(trainingDto.getStartTime());
-        training.setGym(null);
+        training.setGymId(trainingDto.getGymId());
         training.setMaxParticipants(trainingDto.getMaxParticipants());
         training.setUserId(trainingDto.getUserId());
         training.setIsAvailable(trainingDto.getIsAvailable());
+
         return training;
     }
 
@@ -26,7 +27,7 @@ public class TrainingMapper {
         trainingDto.setIsGroupTraining(training.getIsGroupTraining());
         trainingDto.setDate(training.getDate());
         trainingDto.setStartTime(training.getStartTime());
-//        trainingDto.setGym(null);
+        trainingDto.setGymId(training.getGymId());
         trainingDto.setMaxParticipants(training.getMaxParticipants());
         trainingDto.setUserId(training.getUserId());
         trainingDto.setIsAvailable(training.getIsAvailable());

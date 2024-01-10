@@ -1,11 +1,9 @@
 package nikolalukatrening.GUI2.clientViews;
 
 import nikolalukatrening.GUI2.dto.ClientProfileEditorDto;
-import nikolalukatrening.GUI2.dto.NotificationDto;
 import nikolalukatrening.GUI2.dto.TrainingDto;
 import nikolalukatrening.GUI2.dto.UserDto;
 import nikolalukatrening.GUI2.service.impl.RestTemplateServiceImpl;
-import org.springframework.cglib.core.Local;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.web.client.HttpClientErrorException;
@@ -24,6 +22,8 @@ public class ClientsTrainings extends JPanel {
     private JTable trainingTable;
     private DefaultTableModel tableModel;
     private RestTemplate trainingsRestTemplate;
+    private RestTemplate priceTemplate;
+    private RestTemplate gymNameTemplate;
     private RestTemplateServiceImpl restTemplateService;
     private ClientProfileEditorDto client;
     public ClientsTrainings(){
@@ -35,7 +35,7 @@ public class ClientsTrainings extends JPanel {
 
     private void initializeUI() {
         // Definisanje kolona za tabelu
-        String[] columnNames = {"Datum","Grupno", "Clanova", "Pocetno vreme", "Tip","UserId"};
+        String[] columnNames = {"Datum","Grupno", "Clanova", "Pocetno vreme", "Tip", "UserId", "Cena", "Sala"};
 
         // Kreiranje modela tabele sa definisanim kolonama
         tableModel = new DefaultTableModel(columnNames, 0);
@@ -153,6 +153,65 @@ public class ClientsTrainings extends JPanel {
 
     }
 
+    private String getGymName(Integer gymId) {
+        gymNameTemplate = restTemplateService.setupRestTemplate(gymNameTemplate);
+        String gymName = null;
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
+        System.out.println("Gym id : " + gymId);
+        try {
+            ResponseEntity<String> response = gymNameTemplate.exchange(
+                    "http://localhost:8082/api/gym/" + gymId,
+                    HttpMethod.GET,
+                    null,
+                    String.class);
+
+            // Check if response is good
+            if (response.getStatusCode() != HttpStatus.OK) {
+                System.out.println("Error!");
+                return null;
+            }
+            System.out.println("VRACAM : "  + response.getBody());
+            gymName = response.getBody();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return gymName;
+    }
+
+    private Integer updatePrice(Boolean boolSort, String selectedTrainingType) {
+        String selectedTrainingSort = null;
+        if (boolSort == false){
+            selectedTrainingSort = "Individualno";
+        }else{
+            selectedTrainingSort = "Grupno";
+        }
+        return getPriceFromDatabase(selectedTrainingSort, selectedTrainingType);
+    }
+
+    private int getPriceFromDatabase(String trainingSort, String trainingType) {
+        priceTemplate = restTemplateService.setupRestTemplate(priceTemplate);
+        Integer price = 0;
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
+
+        try {
+            ResponseEntity<Integer> response = priceTemplate.exchange(
+                    "http://localhost:8082/api/trainingType/price/" + trainingSort + "/" + trainingType,
+                    HttpMethod.GET,
+                    entity,
+                    Integer.class);
+
+            price = response.getBody();
+        } catch (Exception e) {
+            e.printStackTrace();
+
+        }
+
+        return price;
+    }
     public void loadTrainings(Integer id) {
         trainingsRestTemplate = restTemplateService.setupRestTemplate(trainingsRestTemplate);
 
@@ -174,7 +233,8 @@ public class ClientsTrainings extends JPanel {
                 for (TrainingDto trainingDto : trainingsForClient) {
                     if(trainingDto.getIsAvailable()) {
                         tableModel.addRow(new Object[]{trainingDto.getDate(), trainingDto.getIsGroupTraining(), trainingDto.getMaxParticipants(),
-                                trainingDto.getStartTime(), trainingDto.getTrainingType(), trainingDto.getUserId()});
+                                trainingDto.getStartTime(), trainingDto.getTrainingType(),
+                                trainingDto.getUserId(), updatePrice(trainingDto.getIsGroupTraining(), trainingDto.getTrainingType()), getGymName(trainingDto.getGymId())});
                     }
                 }
             } else {

@@ -23,10 +23,10 @@ public class Training {
     private Integer maxParticipants;
     private Integer userId;
     private Boolean isAvailable;
-
+    private Integer gymId;
     // Dodajte ostale potrebne atribute
 
-    @ManyToOne
-    @JoinColumn(name = "gym_id")
-    private Gym gym;
+//    @ManyToOne
+//    @JoinColumn(name = "gym_id")
+//    private Gym gym;
 }

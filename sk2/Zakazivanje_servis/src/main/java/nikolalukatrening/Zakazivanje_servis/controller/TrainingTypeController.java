@@ -42,4 +42,13 @@ public class TrainingTypeController {
         System.out.println(trainingTypes);
         return ResponseEntity.ok(trainingTypes);
     }
+
+    // zelim da na osnovu trainingSort i trainingType dobijem price
+    @GetMapping("/price/{trainingSort}/{trainingType}")
+    public ResponseEntity<Integer> getPriceByTrainingSortAndTrainingyTType(@PathVariable String trainingSort, @PathVariable String trainingType) {
+        TrainingTypes trainingTypes = trainingTypesRepository.findByTrainingSortAndTrainingType(trainingSort, trainingType);
+        Integer price = trainingTypes.getTrainingTypePrice();
+        System.out.println("price: " + price);
+        return ResponseEntity.ok(price);
+    }
 }
