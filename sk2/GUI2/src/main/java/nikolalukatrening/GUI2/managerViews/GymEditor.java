@@ -39,6 +39,8 @@ public class GymEditor extends JPanel {
         numberOfPersonalTrainersField = new JTextField(20);
         cbTrainingType = new JComboBox<>();
         fetchAllTrainingTypes();
+        cbTrainingType.setSelectedIndex(0);
+        String selectedTrainingType1 = (String) cbTrainingType.getSelectedItem();
         cbTrainingType.addActionListener(e -> {
             // Logika za prikaz cene treninga
             // Ovde biste pozvali REST servis ili neki drugi mehanizam za dobavljanje cene treninga
@@ -47,6 +49,7 @@ public class GymEditor extends JPanel {
 
         });
         trainingTypePriceField = new JTextField(20);
+        fetchPriceForTrainingType(selectedTrainingType1);
         saveButton = new JButton("Sačuvaj");
 
         gbc.gridx = 0;

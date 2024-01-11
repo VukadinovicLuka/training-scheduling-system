@@ -15,6 +15,7 @@ import java.util.*;
 import java.util.List;
 import nikolalukatrening.GUI2.customTable.DateLabelFormatter;
 import nikolalukatrening.GUI2.dto.ClientProfileEditorDto;
+import nikolalukatrening.GUI2.dto.GymDto;
 import nikolalukatrening.GUI2.dto.TrainingDto;
 import nikolalukatrening.GUI2.dto.UserDto;
 import nikolalukatrening.GUI2.service.impl.RestTemplateServiceImpl;
@@ -48,6 +49,7 @@ public class ScheduleTraining extends JPanel {
         private Integer userId;
         private ClientProfileEditorDto client;
         private ProfileEditor profileEditor;
+        private Integer gymId;
 
         List<String> timeSlots = new ArrayList<>();
         public ScheduleTraining(Integer userId) {
@@ -243,6 +245,28 @@ public class ScheduleTraining extends JPanel {
         }
     }
 
+    private GymDto fetchGymByGymName(String gymName){
+
+        GymDto gym = null;
+        gymTemplate = restTemplateServiceImpl.setupRestTemplate(gymTemplate);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        String url = "http://localhost:8082/api/gym/name/" + gymName;
+        try {
+            ResponseEntity<GymDto> response = gymTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<GymDto>() {});
+            gym = response.getBody();
+        } catch (Exception e) {
+            // Handle exceptions
+            e.printStackTrace();
+        }
+        return gym;
+
+    }
+
     private void zakazivanje() {
         if (cbTrainingType.getSelectedItem() == null || datePicker.getModel().getValue() == null || cbTrainingOptions.getSelectedItem() == null || cbTime.getSelectedItem() == null) {
             JOptionPane.showMessageDialog(null, "Morate odabrati sve podatke!");
@@ -259,7 +283,9 @@ public class ScheduleTraining extends JPanel {
                 String[] prvo = time.split("-");
                 Date date = (Date) datePicker.getModel().getValue();
                 LocalDate localDate = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-                Integer gymId = cbGym.getSelectedIndex() + 1;
+                String gymName = (String) cbGym.getSelectedItem();
+                GymDto gymDto = fetchGymByGymName(gymName);
+                this.gymId = Math.toIntExact(gymDto.getId());
                 if(trainingDto1.getDate().equals(localDate) && trainingDto1.getStartTime().equals(prvo[0]) && trainingDto1.getGymId()==gymId){
                     if(trainingDto1.getMaxParticipants()==2){
                         JOptionPane.showMessageDialog(null, "Popunjen kapacitet za odabrani trening");
@@ -288,7 +314,7 @@ public class ScheduleTraining extends JPanel {
         // Now you can use localDate in your DTO
 
         trainingDto.setDate(localDate);
-        trainingDto.setGymId(cbGym.getSelectedIndex() + 1);
+        trainingDto.setGymId(Math.toIntExact(fetchGymByGymName((String) cbGym.getSelectedItem()).getId()));
         System.out.println("Gym id: " + trainingDto.getGymId());
         trainingDto.setIsAvailable(true);
 
@@ -591,9 +617,3 @@ public class ScheduleTraining extends JPanel {
             btnBook.setForeground(Color.WHITE);
         }
 }
-
-
-
-
-
-

@@ -1,14 +1,13 @@
 package nikolalukatrening.Zakazivanje_servis.service.impl;
 
-import nikolalukatrening.Zakazivanje_servis.dto.ClientProfileEditorDto;
-import nikolalukatrening.Zakazivanje_servis.dto.EmailMessageDto;
-import nikolalukatrening.Zakazivanje_servis.dto.TrainingDto;
+import nikolalukatrening.Zakazivanje_servis.dto.*;
 import nikolalukatrening.Zakazivanje_servis.mapper.TrainingMapper;
 import nikolalukatrening.Zakazivanje_servis.message.MessageHelper;
 import nikolalukatrening.Zakazivanje_servis.model.Training;
 import nikolalukatrening.Zakazivanje_servis.repository.TrainingRepository;
 import nikolalukatrening.Zakazivanje_servis.service.TrainingService;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Service;
@@ -29,6 +28,7 @@ public class TrainingServiceImpl implements TrainingService {
     private TrainingMapper trainingMapper;
     private RestTemplateServiceImpl restTemplateServiceImpl;
     private RestTemplate trainingRestTemplate;
+    private RestTemplate managerRestTemplate;
 
     private JmsTemplate jmsTemplate;
     private String activationDestination;
@@ -48,6 +48,7 @@ public class TrainingServiceImpl implements TrainingService {
         Training training = trainingMapper.trainingDtoToTraining(trainingDto);
         trainingRepository.save(training);
         createEmailMessage(trainingDto, 0);
+        createManagerEmailMessage(trainingDto, 0);
         return training;
     }
 
@@ -80,6 +81,10 @@ public class TrainingServiceImpl implements TrainingService {
         training.setUserId(trainingDto.getUserId());
         training.setMaxParticipants(trainingDto.getMaxParticipants());
         training.setIsAvailable(trainingDto.getIsAvailable());
+        // email
+        createEmailMessage(trainingDto, 1);
+        createManagerEmailMessage(trainingDto, 1);
+
         return trainingRepository.save(training);
     }
 
@@ -90,7 +95,7 @@ public class TrainingServiceImpl implements TrainingService {
         if (trainingOptional.isPresent()) {
             trainingRepository.delete(trainingOptional.get());
             // email
-            createEmailMessage(trainingMapper.trainingToTrainingDto(trainingOptional.get()), 1);
+//            createEmailMessage(trainingMapper.trainingToTrainingDto(trainingOptional.get()), 1);
             return true; // Successfully deleted
         } else {
             return false; // Training not found
@@ -98,6 +103,46 @@ public class TrainingServiceImpl implements TrainingService {
     }
 
 
+    private void createManagerEmailMessage(TrainingDto trainingDto, int flag){
+        String gymName = getGymName(trainingDto.getGymId());
+        managerRestTemplate = restTemplateServiceImpl.setupRestTemplate(managerRestTemplate);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
+        ResponseEntity<ManagerDto> responseForClient = managerRestTemplate.exchange(
+                "http://localhost:8080/api/manager/gymName/" +gymName,
+                HttpMethod.GET,
+                entity,
+                ManagerDto.class);
+        ManagerDto manager = responseForClient.getBody();
+
+        Map<String, String> params = new HashMap<>();
+        params.put("ime", manager.getUser().getFirstName());
+        params.put("prezime", manager.getUser().getLastName());
+        params.put("managerId", manager.getId().toString());
+        if (flag == 0){
+            emailMessage = new EmailMessageDto(
+                    manager.getUser().getEmail(),
+                    "Manager Reservation Email",
+                    "Pozdrav, " + params.get("ime") + " " + params.get("prezime") +
+                            " Zakazan je trening u vasoj sali: " + trainingDto.getDate() + " u " + trainingDto.getStartTime() + "h",
+                    "MANAGER_RESERVATION",
+                    params
+            );
+        }else{
+            emailMessage = new EmailMessageDto(
+                    manager.getUser().getEmail(),
+                    "Manager Reservation Email",
+                    "Pozdrav, " + params.get("ime") + " " + params.get("prezime") +
+                            " Zakazan trening u vasoj sali je otkazan: " + trainingDto.getDate() + " u " + trainingDto.getStartTime() + "h",
+                    "MANAGER_CANCELATION",
+                    params
+            );
+        }
+
+        jmsTemplate.convertAndSend(activationDestination, messageHelper.createTextMessage(emailMessage));
+        System.out.println("Email sent to manager" +  manager.getUser().getFirstName());
+    }
 
     private void createEmailMessage(TrainingDto trainingDto, int flag) {
 
@@ -140,5 +185,29 @@ public class TrainingServiceImpl implements TrainingService {
             );
         }
         jmsTemplate.convertAndSend(activationDestination, messageHelper.createTextMessage(emailMessage));
+    }
+
+    private String getGymName(Integer gymId) {
+        restTemplateServiceImpl = new RestTemplateServiceImpl();
+        trainingRestTemplate = restTemplateServiceImpl.setupRestTemplate(trainingRestTemplate);
+        String gymName = null;
+        try {
+            ResponseEntity<Map<String, String>> response = trainingRestTemplate.exchange(
+                    "http://localhost:8082/api/gym/" + gymId,
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<Map<String, String>>() {});
+
+            // Check if response is good
+            if (response.getStatusCode() == HttpStatus.OK) {
+                gymName = response.getBody().get("name");
+                System.out.println("Retrieved gym name: " + gymName);
+            } else {
+                System.out.println("Error retrieving gym name!");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return gymName;
     }
 }

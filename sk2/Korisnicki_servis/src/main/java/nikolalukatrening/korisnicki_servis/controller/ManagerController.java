@@ -63,6 +63,15 @@ public class ManagerController {
     }
 
 
+    // get manager by gymName
+    @GetMapping("/gymName/{gymName}")
+    public ResponseEntity<Manager> getManagerByGymName(@PathVariable String gymName) {
+        Optional<Manager> managerOptional = managerRepository.findByGymName(gymName);
+        return managerOptional
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
 //    @PutMapping("/{id}")
 //    public ResponseEntity<ClientAdminDto> updateClientById(@PathVariable Long id, @RequestBody @Valid ClientAdminDto clientAdminDto){
 //        return new ResponseEntity<>(clientService.updateClientById(id, clientAdminDto), HttpStatus.OK);

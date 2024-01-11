@@ -34,6 +34,7 @@ public class NotificationListener {
         notificationType.setType(emailMessage.getType());
         notificationType.setReceiver(emailMessage.getTo());
         if (emailMessage.getParams().get("clientId") != null) notificationType.setClientId(Long.valueOf(emailMessage.getParams().get("clientId")));
+        if (emailMessage.getParams().get("managerId") != null) notificationType.setManagerId(Long.valueOf(emailMessage.getParams().get("managerId")));
         if (emailMessage.getParams().get("link") != null) notificationType.setLink(emailMessage.getParams().get("link"));
         notificationType.setFirstName(emailMessage.getParams().get("ime"));
         notificationType.setLastName(emailMessage.getParams().get("prezime"));

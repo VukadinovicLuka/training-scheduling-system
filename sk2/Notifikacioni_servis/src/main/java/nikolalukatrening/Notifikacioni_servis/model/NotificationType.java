@@ -22,6 +22,7 @@ public class NotificationType {
     private String receiver;
     private String password;
     private Long clientId;
+    private Long managerId;
 
     // Konstruktori, getteri i setteri
 }

@@ -1,6 +1,7 @@
 package nikolalukatrening.GUI2.clientViews;
 
 import nikolalukatrening.GUI2.dto.ClientProfileEditorDto;
+import nikolalukatrening.GUI2.dto.GymDto;
 import nikolalukatrening.GUI2.dto.TrainingDto;
 import nikolalukatrening.GUI2.dto.UserDto;
 import nikolalukatrening.GUI2.service.impl.RestTemplateServiceImpl;
@@ -25,6 +26,7 @@ public class ClientsTrainings extends JPanel {
     private RestTemplate trainingsRestTemplate;
     private RestTemplate priceTemplate;
     private RestTemplate gymNameTemplate;
+    private RestTemplate gymTemplate;
     private RestTemplateServiceImpl restTemplateService;
     private ClientProfileEditorDto client;
     public ClientsTrainings(){
@@ -80,7 +82,7 @@ public class ClientsTrainings extends JPanel {
     }
 
     private void performCancellation(int row) {
-
+        String gymName = (String) tableModel.getValueAt(row, 7);
         Boolean isGroupTraining = (Boolean) tableModel.getValueAt(row, 1);
         String trainingType = (String) tableModel.getValueAt(row, 4);
         int participants = (int) tableModel.getValueAt(row,2);
@@ -110,7 +112,7 @@ public class ClientsTrainings extends JPanel {
         tra.setMaxParticipants(participants);
         tra.setIsGroupTraining(isGroupTraining);
         tra.setIsAvailable(false);
-        tra.setGymId(null);
+        tra.setGymId(Math.toIntExact(fetchGymByGymName(gymName).getId()));
         tra.setTrainingType(trainingType);
         tra.setUserId(userId);
 
@@ -175,6 +177,28 @@ public class ClientsTrainings extends JPanel {
             e.printStackTrace();
         }
         return gymName;
+    }
+
+    private GymDto fetchGymByGymName(String gymName){
+
+        GymDto gym = null;
+        gymTemplate = restTemplateService.setupRestTemplate(gymTemplate);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        String url = "http://localhost:8082/api/gym/name/" + gymName;
+        try {
+            ResponseEntity<GymDto> response = gymTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<GymDto>() {});
+            gym = response.getBody();
+        } catch (Exception e) {
+            // Handle exceptions
+            e.printStackTrace();
+        }
+        return gym;
+
     }
 
     private Integer updatePrice(Boolean boolSort, String selectedTrainingType) {
