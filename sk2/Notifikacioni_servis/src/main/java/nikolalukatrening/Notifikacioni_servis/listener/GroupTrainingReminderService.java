@@ -55,7 +55,7 @@ public class GroupTrainingReminderService {
     }
 
 
-    @Scheduled(cron = "0 * * * * *") // At the top of every hour
+    @Scheduled(cron = "* 0 * * * *") // At the top of every hour
     public void checkTrainingSessions() {
         // Your database query logic goes here
         List<TrainingDto> trainings = fetchAllTrainings();

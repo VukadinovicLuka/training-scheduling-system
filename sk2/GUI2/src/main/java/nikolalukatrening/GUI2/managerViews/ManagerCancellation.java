@@ -1,9 +1,6 @@
-package nikolalukatrening.GUI2.clientViews;
+package nikolalukatrening.GUI2.managerViews;
 
-import nikolalukatrening.GUI2.dto.ClientProfileEditorDto;
-import nikolalukatrening.GUI2.dto.GymDto;
-import nikolalukatrening.GUI2.dto.TrainingDto;
-import nikolalukatrening.GUI2.dto.UserDto;
+import nikolalukatrening.GUI2.dto.*;
 import nikolalukatrening.GUI2.service.impl.RestTemplateServiceImpl;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
@@ -16,20 +13,17 @@ import java.awt.*;
 import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
-public class ClientsTrainings extends JPanel {
+public class ManagerCancellation extends JPanel {
 
     private JTable trainingTable;
     private DefaultTableModel tableModel;
     private RestTemplate trainingsRestTemplate;
-    private RestTemplate priceTemplate;
-    private RestTemplate gymNameTemplate;
-    private RestTemplate gymTemplate;
     private RestTemplateServiceImpl restTemplateService;
     private ClientProfileEditorDto client;
-    public ClientsTrainings(){
+
+    public ManagerCancellation(){
         restTemplateService = new RestTemplateServiceImpl();
         setLayout(new BorderLayout());
         initializeUI();
@@ -38,7 +32,7 @@ public class ClientsTrainings extends JPanel {
 
     private void initializeUI() {
         // Definisanje kolona za tabelu
-        String[] columnNames = {"Datum","Grupno", "Clanova", "Pocetno vreme", "Tip", "UserId", "Cena", "Sala"};
+        String[] columnNames = {"Datum","Grupno", "Clanova", "Pocetno vreme", "Tip", "UserId","Gym name"};
 
         // Kreiranje modela tabele sa definisanim kolonama
         tableModel = new DefaultTableModel(columnNames, 0);
@@ -81,8 +75,86 @@ public class ClientsTrainings extends JPanel {
         }
     }
 
+    public void loadTrainings(Integer id) {
+        trainingsRestTemplate = restTemplateService.setupRestTemplate(trainingsRestTemplate);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
+
+        ResponseEntity<ManagerDto> responseForManager = trainingsRestTemplate.exchange(
+                "http://localhost:8080/api/manager/" +id,
+                HttpMethod.GET,
+                null,
+                ManagerDto.class);
+
+        String gymName = responseForManager.getBody().getGymName();
+        GymDto gymDto = fetchGymByGymName(gymName);
+        Long gymId = gymDto.getId();
+
+        String url = "http://localhost:8082/api/training/by-manager/" + gymId;
+
+        try {
+            ResponseEntity<java.util.List<TrainingDto>> trainingResponse = trainingsRestTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<java.util.List<TrainingDto>>() {});
+
+            List<TrainingDto> trainingsForManager = trainingResponse.getBody();
+
+            if (trainingsForManager != null) {
+                for (TrainingDto trainingDto : trainingsForManager) {
+                    if(trainingDto.getIsAvailable()) {
+                        tableModel.addRow(new Object[]{trainingDto.getDate(), trainingDto.getIsGroupTraining(), trainingDto.getMaxParticipants(),
+                                trainingDto.getStartTime(), trainingDto.getTrainingType(),
+                                trainingDto.getUserId(),gymName});
+                    }
+                }
+            } else {
+                showNoTrainingsMessage();
+            }
+        } catch (HttpClientErrorException ex) {
+            if (ex.getStatusCode() == HttpStatus.NOT_FOUND) {
+                showNoTrainingsMessage();
+            } else {
+                // Handle other types of exceptions here
+                JOptionPane.showMessageDialog(null, "An error occurred: " + ex.getMessage());
+            }
+        }
+    }
+
+    private void showNoTrainingsMessage() {
+        // Remove all existing rows
+        tableModel.setRowCount(0);
+
+        // Show message in the UI
+        JOptionPane.showMessageDialog(null, "You have no scheduled trainings.");
+    }
+    private GymDto fetchGymByGymName(String gymName){
+
+        GymDto gym = null;
+        trainingsRestTemplate = restTemplateService.setupRestTemplate(trainingsRestTemplate);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        String url = "http://localhost:8082/api/gym/name/" + gymName;
+        try {
+            ResponseEntity<GymDto> response = trainingsRestTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<GymDto>() {});
+            gym = response.getBody();
+        } catch (Exception e) {
+            // Handle exceptions
+            e.printStackTrace();
+        }
+        return gym;
+    }
+
+
     private void performCancellation(int row) {
-        String gymName = (String) tableModel.getValueAt(row, 7);
+        String gymName = (String) tableModel.getValueAt(row, 6);
         Boolean isGroupTraining = (Boolean) tableModel.getValueAt(row, 1);
         String trainingType = (String) tableModel.getValueAt(row, 4);
         int participants = (int) tableModel.getValueAt(row,2);
@@ -117,7 +189,7 @@ public class ClientsTrainings extends JPanel {
         tra.setUserId(userId);
 
 
-        updateParticipantsTrainingEmail(tra);
+        activateAvailableTrainingRoute(tra.getDate(),tra.getStartTime(),tra.getUserId());
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -156,153 +228,23 @@ public class ClientsTrainings extends JPanel {
 
     }
 
-    private String getGymName(Integer gymId) {
-        gymNameTemplate = restTemplateService.setupRestTemplate(gymNameTemplate);
-        String gymName = null;
-        try {
-            ResponseEntity<Map<String, String>> response = gymNameTemplate.exchange(
-                    "http://localhost:8082/api/gym/" + gymId,
-                    HttpMethod.GET,
-                    null,
-                    new ParameterizedTypeReference<Map<String, String>>() {});
-
-            // Check if response is good
-            if (response.getStatusCode() == HttpStatus.OK) {
-                gymName = response.getBody().get("name");
-                System.out.println("Retrieved gym name: " + gymName);
-            } else {
-                System.out.println("Error retrieving gym name!");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return gymName;
-    }
-
-    private GymDto fetchGymByGymName(String gymName){
-
-        GymDto gym = null;
-        gymTemplate = restTemplateService.setupRestTemplate(gymTemplate);
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        String url = "http://localhost:8082/api/gym/name/" + gymName;
-        try {
-            ResponseEntity<GymDto> response = gymTemplate.exchange(
-                    url,
-                    HttpMethod.GET,
-                    null,
-                    new ParameterizedTypeReference<GymDto>() {});
-            gym = response.getBody();
-        } catch (Exception e) {
-            // Handle exceptions
-            e.printStackTrace();
-        }
-        return gym;
-
-    }
-
-    private Integer updatePrice(Boolean boolSort, String selectedTrainingType) {
-        String selectedTrainingSort = null;
-        if (boolSort == false){
-            selectedTrainingSort = "Individualno";
-        }else{
-            selectedTrainingSort = "Grupno";
-        }
-        return getPriceFromDatabase(selectedTrainingSort, selectedTrainingType);
-    }
-
-    private int getPriceFromDatabase(String trainingSort, String trainingType) {
-        priceTemplate = restTemplateService.setupRestTemplate(priceTemplate);
-        Integer price = 0;
+    public void activateAvailableTrainingRoute(LocalDate date, String startTime, int userId) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
 
-        try {
-            ResponseEntity<Integer> response = priceTemplate.exchange(
-                    "http://localhost:8082/api/trainingType/price/" + trainingSort + "/" + trainingType,
-                    HttpMethod.GET,
-                    entity,
-                    Integer.class);
+        ResponseEntity<Void> response = trainingsRestTemplate.exchange(
+                "http://localhost:8082/api/training/deleteTraining?date=" +
+                        date.toString() + "&startTime=" + startTime + "&userId=" + userId,
+                HttpMethod.DELETE,
+                entity,
+                Void.class);
 
-            price = response.getBody();
-        } catch (Exception e) {
-            e.printStackTrace();
-
+        if (response.getStatusCode() == HttpStatus.OK) {
+            System.out.println("Training cancelled successfully.");
+        } else {
+            System.out.println("Failed to cancel training.");
         }
-
-        return price;
-    }
-
-    public void loadTrainings(Integer id) {
-        trainingsRestTemplate = restTemplateService.setupRestTemplate(trainingsRestTemplate);
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
-
-        String url = "http://localhost:8082/api/training/by-user/" + id;
-
-        try {
-            ResponseEntity<List<TrainingDto>> trainingResponse = trainingsRestTemplate.exchange(
-                    url,
-                    HttpMethod.GET,
-                    null,
-                    new ParameterizedTypeReference<List<TrainingDto>>() {});
-
-            List<TrainingDto> trainingsForClient = trainingResponse.getBody();
-            int i = 1;
-            if (trainingsForClient != null) {
-                for (TrainingDto trainingDto : trainingsForClient) {
-                    if(trainingDto.getIsAvailable()) {
-                        Integer price = 0;
-                        if(i%12==0){
-                            price = 0;
-                        } else {
-                            price = updatePrice(trainingDto.getIsGroupTraining(), trainingDto.getTrainingType());
-                        }
-                        tableModel.addRow(new Object[]{trainingDto.getDate(), trainingDto.getIsGroupTraining(), trainingDto.getMaxParticipants(),
-                                trainingDto.getStartTime(), trainingDto.getTrainingType(),
-                                trainingDto.getUserId(),price, getGymName(trainingDto.getGymId())});
-                    }
-                    i++;
-                }
-            } else {
-                showNoTrainingsMessage();
-            }
-        } catch (HttpClientErrorException ex) {
-            if (ex.getStatusCode() == HttpStatus.NOT_FOUND) {
-                showNoTrainingsMessage();
-            } else {
-                // Handle other types of exceptions here
-                JOptionPane.showMessageDialog(null, "An error occurred: " + ex.getMessage());
-            }
-        }
-    }
-
-    private void showNoTrainingsMessage() {
-        // Remove all existing rows
-        tableModel.setRowCount(0);
-
-        // Show message in the UI
-        JOptionPane.showMessageDialog(null, "You have no scheduled trainings.");
-    }
-
-
-    public void updateParticipantsTraining(TrainingDto trainingDto){
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
-        RequestEntity<TrainingDto> requestEntity = RequestEntity.put(URI.create("http://localhost:8082/api/training/updateTrainingReserve")).headers(headers).body(trainingDto);
-        ResponseEntity<TrainingDto> responseEntity = trainingsRestTemplate.exchange(requestEntity, TrainingDto.class);
-    }
-
-    public void updateParticipantsTrainingEmail(TrainingDto trainingDto){
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
-        RequestEntity<TrainingDto> requestEntity = RequestEntity.put(URI.create("http://localhost:8082/api/training/updateTrainingReserveEmail")).headers(headers).body(trainingDto);
-        ResponseEntity<TrainingDto> responseEntity = trainingsRestTemplate.exchange(requestEntity, TrainingDto.class);
     }
 
     private Set<TrainingDto> fetchAllTrainings() {
@@ -322,25 +264,12 @@ public class ClientsTrainings extends JPanel {
         return training;
     }
 
-    // In your frontend Java code where you handle the cancellation
-
-    public void activateAvailableTrainingRoute(LocalDate date, String startTime, int userId) {
+    public void updateParticipantsTraining(TrainingDto trainingDto){
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
-
-        ResponseEntity<Void> response = trainingsRestTemplate.exchange(
-                "http://localhost:8082/api/training/deleteTraining?date=" +
-                        date.toString() + "&startTime=" + startTime + "&userId=" + userId,
-                HttpMethod.DELETE,
-                entity,
-                Void.class);
-
-        if (response.getStatusCode() == HttpStatus.OK) {
-            System.out.println("Training cancelled successfully.");
-        } else {
-            System.out.println("Failed to cancel training.");
-        }
+        RequestEntity<TrainingDto> requestEntity = RequestEntity.put(URI.create("http://localhost:8082/api/training/updateTrainingReserve")).headers(headers).body(trainingDto);
+        ResponseEntity<TrainingDto> responseEntity = trainingsRestTemplate.exchange(requestEntity, TrainingDto.class);
     }
 
 }

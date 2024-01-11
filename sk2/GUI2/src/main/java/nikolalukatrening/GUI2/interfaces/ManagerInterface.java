@@ -4,6 +4,8 @@ import nikolalukatrening.GUI2.adminViews.AllNotificationsAccess;
 import nikolalukatrening.GUI2.adminViews.AllUsersAccess;
 import nikolalukatrening.GUI2.clientViews.ClientNotifications;
 import nikolalukatrening.GUI2.managerViews.GymEditor;
+import nikolalukatrening.GUI2.managerViews.ManagerCancellation;
+import nikolalukatrening.GUI2.managerViews.ManagerNotifications;
 
 import javax.swing.*;
 import java.awt.*;
@@ -15,6 +17,9 @@ public class ManagerInterface extends JFrame {
     private JPanel cardPanel;
     private JToolBar toolBar;
     private GymEditor gymEditorView;
+    private ManagerNotifications managerNotifications;
+
+    private ManagerCancellation managerCancellation;
     private Integer userId;
 
     public ManagerInterface(Integer userId) {
@@ -43,6 +48,8 @@ public class ManagerInterface extends JFrame {
         // Add buttons to toolbar
         addButtonToToolbar("Uređivanje podataka o fiskulturnoj sali", "gymEdit", "edit.png");
         addButtonToToolbar("Poslate notifikacije menadzeru", "notifications", "rate.png");
+        addButtonToToolbar("Otkazivanje treninga od menadzera","cancellation","rate.png");
+
         // Add toolBar and cardPanel to frame
         add(toolBar, BorderLayout.NORTH);
         add(cardPanel, BorderLayout.CENTER);
@@ -70,9 +77,14 @@ public class ManagerInterface extends JFrame {
             cardPanel.add(gymEditorView, "gymEdit");
         } else if ("notifications".equals(e.getActionCommand())){
             // TODO: Add notifications view
-//            clientNotificationsView = new ClientNotifications();
-//            clientNotificationsView.loadNotifications(this.userId);
-//            cardPanel.add(clientNotificationsView, "notifications");
+            managerNotifications = new ManagerNotifications();
+            //clientNotificationsView.loadNotifications(this.userId);
+            managerNotifications.loadNotifications(userId);
+            cardPanel.add(managerNotifications, "notifications");
+        } else if("cancellation".equals(e.getActionCommand())){
+            managerCancellation = new ManagerCancellation();
+            managerCancellation.loadTrainings(userId);
+            cardPanel.add(managerCancellation,"cancellation");
         }
         cardLayout.show(cardPanel, e.getActionCommand());
     }

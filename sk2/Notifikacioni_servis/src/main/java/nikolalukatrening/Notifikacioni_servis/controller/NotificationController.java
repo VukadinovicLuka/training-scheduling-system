@@ -30,6 +30,14 @@ public class NotificationController {
                 ResponseEntity.ok(notificationTypeOptional);
     }
 
+    @GetMapping("/manager/{id}")
+    public ResponseEntity<List<NotificationType>> getNotificaitonsByManagerId(@PathVariable Long id) {
+        List<NotificationType> notificationTypeOptional = notificationRepository.findByManagerId(id);
+        return notificationTypeOptional.isEmpty() ?
+                ResponseEntity.notFound().build() :
+                ResponseEntity.ok(notificationTypeOptional);
+    }
+
     @GetMapping("/all")
     public ResponseEntity<List<NotificationType>> getAllNotifications() {
         List<NotificationType> notifications = notificationRepository.findAll();

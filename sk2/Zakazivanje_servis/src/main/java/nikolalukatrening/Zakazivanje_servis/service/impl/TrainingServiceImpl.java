@@ -82,6 +82,25 @@ public class TrainingServiceImpl implements TrainingService {
         training.setMaxParticipants(trainingDto.getMaxParticipants());
         training.setIsAvailable(trainingDto.getIsAvailable());
         // email
+//        createEmailMessage(trainingDto, 1);
+//        createManagerEmailMessage(trainingDto, 1);
+
+        return trainingRepository.save(training);
+    }
+
+    @Override
+    public Training updateReserveEmail(TrainingDto trainingDto) {
+        Training training = trainingRepository.findByDateAndStartTimeAndUserId(trainingDto.getDate(),trainingDto.getStartTime(), Long.valueOf(trainingDto.getUserId())).orElseThrow(()->new RuntimeException());
+
+        training.setTrainingType(trainingDto.getTrainingType());
+        training.setIsGroupTraining(trainingDto.getIsGroupTraining());
+        training.setDate(trainingDto.getDate());
+        training.setStartTime(trainingDto.getStartTime());
+        training.setGymId(trainingDto.getGymId());
+        training.setUserId(trainingDto.getUserId());
+        training.setMaxParticipants(trainingDto.getMaxParticipants());
+        training.setIsAvailable(trainingDto.getIsAvailable());
+        // email
         createEmailMessage(trainingDto, 1);
         createManagerEmailMessage(trainingDto, 1);
 
@@ -95,7 +114,8 @@ public class TrainingServiceImpl implements TrainingService {
         if (trainingOptional.isPresent()) {
             trainingRepository.delete(trainingOptional.get());
             // email
-//            createEmailMessage(trainingMapper.trainingToTrainingDto(trainingOptional.get()), 1);
+            createEmailMessage(trainingMapper.trainingToTrainingDto(trainingOptional.get()), 1);
+            createManagerEmailMessage(trainingMapper.trainingToTrainingDto(trainingOptional.get()), 1);
             return true; // Successfully deleted
         } else {
             return false; // Training not found

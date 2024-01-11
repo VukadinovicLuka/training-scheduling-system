@@ -72,9 +72,23 @@ public class TrainingController {
         return new ResponseEntity<>(trainingService.updateReserve(trainingDto), HttpStatus.OK);
     }
 
+    @PutMapping("/updateTrainingReserveEmail")
+    public ResponseEntity<Training> updateTrainingReserveEmail(@RequestBody @Valid TrainingDto trainingDto) {
+        return new ResponseEntity<>(trainingService.updateReserveEmail(trainingDto), HttpStatus.OK);
+    }
+
     @GetMapping("/by-user/{userId}")
     public ResponseEntity<List<Training>> getTrainingsByUserId(@PathVariable Long userId) {
         List<Training> trainings = trainingRepository.findAllByUserId(userId);
+        if (trainings.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(trainings);
+    }
+
+    @GetMapping("/by-manager/{gymId}")
+    public ResponseEntity<List<Training>> getTrainingsByGymId(@PathVariable Long gymId) {
+        List<Training> trainings = trainingRepository.findAllByGymId(gymId);
         if (trainings.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
