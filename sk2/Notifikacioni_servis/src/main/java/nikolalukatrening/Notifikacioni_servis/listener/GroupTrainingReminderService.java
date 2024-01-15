@@ -3,6 +3,7 @@ package nikolalukatrening.Notifikacioni_servis.listener;
 import nikolalukatrening.Notifikacioni_servis.config.dto.ClientProfileEditorDto;
 import nikolalukatrening.Notifikacioni_servis.config.dto.EmailMessageDto;
 import nikolalukatrening.Notifikacioni_servis.config.dto.TrainingDto;
+import nikolalukatrening.Notifikacioni_servis.config.dto.UserDto;
 import nikolalukatrening.Notifikacioni_servis.service.impl.RestTemplateServiceImpl;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -11,7 +12,7 @@ import org.springframework.jms.core.JmsTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
-
+import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.Calendar;
@@ -72,6 +73,7 @@ public class GroupTrainingReminderService {
                         if(training.getMaxParticipants() < 3) {
                             createEmailMessage(training);
                             System.out.println("Otkazivanje treninga korisniku sa id: " + training.getUserId());
+                            deleteTraining(training.getDate(),training.getStartTime(),training.getUserId());
                         }
                     }
                 }
@@ -83,6 +85,18 @@ public class GroupTrainingReminderService {
     }
 
 
+    private void deleteTraining(LocalDate date, String startTime, int userId){
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
+
+        ResponseEntity<Void> response = trainingRestTemplate.exchange(
+                "http://localhost:8082/api/training/deleteTraining?date=" +
+                        date.toString() + "&startTime=" + startTime + "&userId=" + userId,
+                HttpMethod.DELETE,
+                entity,
+                Void.class);
+    }
 
     private void createEmailMessage(TrainingDto trainingDto) {
 
@@ -101,6 +115,8 @@ public class GroupTrainingReminderService {
                 ClientProfileEditorDto.class);
         ClientProfileEditorDto client = responseForClient.getBody();
 
+        updateReservationForClient(client);
+
         Map<String, String> params = new HashMap<>();
         params.put("ime", client.getUser().getFirstName());
         params.put("prezime", client.getUser().getLastName());
@@ -114,6 +130,34 @@ public class GroupTrainingReminderService {
                 params
         );
         jmsTemplate.convertAndSend(activationDestination, messageHelper.createTextMessage(emailMessage));
+    }
+
+    private void updateReservationForClient(ClientProfileEditorDto client){
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> entity = new HttpEntity<>("parameters", headers);
+
+        int trening = client.getReservedTraining() - 1;
+        UserDto userDto = new UserDto();
+        userDto.setPassword(client.getUser().getPassword());
+        userDto.setUsername(client.getUser().getUsername());
+        userDto.setEmail(client.getUser().getEmail());
+        userDto.setFirstName(client.getUser().getFirstName());
+        userDto.setLastName(client.getUser().getLastName());
+        userDto.setDateOfBirth(client.getUser().getDateOfBirth());
+        userDto.setRole(client.getUser().getRole());
+        ClientProfileEditorDto clientToUpdate = new ClientProfileEditorDto();
+        clientToUpdate.setUser(userDto);
+        clientToUpdate.setCardNumber(client.getCardNumber());
+        clientToUpdate.setReservedTraining(trening);
+        clientToUpdate.setId(Long.valueOf(client.getId()));
+        clientToUpdate.setActivationToken(client.getActivationToken());
+        clientToUpdate.setIsActivated(client.getIsActivated());
+
+        RequestEntity<ClientProfileEditorDto> requestEntity1 = RequestEntity.put(URI.create("http://localhost:8080/api/client/" + client.getId())).headers(headers).body(clientToUpdate);
+
+        // Posaljite zahtev
+        ResponseEntity<ClientProfileEditorDto> responseEntity1 = trainingRestTemplate.exchange(requestEntity1, ClientProfileEditorDto.class);
     }
 
 }

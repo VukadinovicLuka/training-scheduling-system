@@ -230,4 +230,10 @@ public class TrainingServiceImpl implements TrainingService {
         }
         return gymName;
     }
+
+    @Override
+    public Optional<String> getTrainingTypeByDateAndStartTime(LocalDate date, String startTime) {
+        return trainingRepository.findByDateAndStartTime(date, startTime)
+                .map(Training::getTrainingType);
+    }
 }

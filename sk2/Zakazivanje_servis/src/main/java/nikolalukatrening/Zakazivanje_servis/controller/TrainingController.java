@@ -110,5 +110,14 @@ public class TrainingController {
         }
     }
 
+    @GetMapping("/type/{date}/{startTime}")
+    public ResponseEntity<String> getTrainingTypeByDateAndStartTime(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @RequestParam String startTime) {
+        return trainingService.getTrainingTypeByDateAndStartTime(date, startTime)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
 
 }

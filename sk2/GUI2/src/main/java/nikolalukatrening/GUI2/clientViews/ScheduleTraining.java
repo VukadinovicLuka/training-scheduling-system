@@ -518,6 +518,10 @@ public class ScheduleTraining extends JPanel {
         private void updateTrainingOptions() {
             cbTrainingOptions.removeAllItems();
             Date selectedDate = (Date) datePicker.getModel().getValue();
+            String time = (String) cbTime.getSelectedItem();
+            String[] prvo = time.split("-");
+
+
             if (selectedDate != null) {
                 // Convert Date to LocalDate or the format required by your backend
                 LocalDate localDate = selectedDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
