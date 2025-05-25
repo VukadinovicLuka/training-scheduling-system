@@ -69,4 +69,4 @@ The complete documentation for the **Personal Training Scheduling System** proje
 - [Training Scheduling System Documentation](https://github.com/nivancev-raf/training-scheduling-system/blob/main/SK-drugi%20projekat%20(2023).pdf)
 
 ## Contact
-For any questions or feedback, please reach out to nivancev02@gmail.com.
+For any questions or feedback, please reach out to luka.zarkovo29@gmail.com.
