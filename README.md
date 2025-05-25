@@ -47,7 +47,7 @@ The **Personal Training Scheduling System** is divided into three main services:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/nivancev-raf/training-scheduling-system.git
+   git clone https://github.com/VukadinovicLuka/training-scheduling-system.git
    ```
 2. Build the project using Maven or Gradle:
    ```bash
@@ -66,7 +66,7 @@ The **Personal Training Scheduling System** is divided into three main services:
 ## Documentation
 
 The complete documentation for the **Personal Training Scheduling System** project, including the technical and functional requirements, is available in the following PDF document:
-- [Training Scheduling System Documentation](https://github.com/nivancev-raf/training-scheduling-system/blob/main/SK-drugi%20projekat%20(2023).pdf)
+- [Training Scheduling System Documentation](https://github.com/VukadinovicLuka/training-scheduling-system/blob/main/SK-drugi%20projekat%20(2023).pdf)
 
 ## Contact
 For any questions or feedback, please reach out to luka.zarkovo29@gmail.com.
