@@ -54,14 +54,22 @@ The **Personal Training Scheduling System** is divided into three main services:
    cd training-scheduling-system
    mvn clean install
    ```
-3. Start the services (example for the user service):
-   ```bash
-   java -jar user-service/target/user-service.jar
-   ```
-4. Configure and run the API Gateway:
-   ```bash
-   java -jar api-gateway/target/api-gateway.jar
-   ```
+3. Start the services:
+    ```bash
+    # User Service
+    cd Korisnicki_servis
+    mvn spring-boot:run
+    
+    # In new terminals:
+    cd Notifikacioni_servis
+    mvn spring-boot:run
+    
+    cd Zakazivanje_servis  
+    mvn spring-boot:run
+    
+    cd GUI2
+    mvn spring-boot:run
+    ```
 
 ## Documentation
 
